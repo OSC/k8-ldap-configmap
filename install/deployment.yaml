@@ -1,0 +1,67 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8-ldap-configmap
+  namespace: k8-ldap-configmap
+  labels:
+    app.kubernetes.io/name: k8-ldap-configmap
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: k8-ldap-configmap
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: k8-ldap-configmap
+    spec:
+      serviceAccountName: k8-ldap-configmap
+      containers:
+      - name: k8-ldap-configmap
+        image: docker.io/ohiosupercomputer/k8-ldap-configmap:latest
+        imagePullPolicy: Always
+        args:
+        - --ldap-url=
+        - --ldap-user-base-dn=
+        - --ldap-group-base-dn=
+        - --namespace=k8-ldap-configmap
+        ports:
+        - containerPort: 8080
+          name: metrics
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - all
+          privileged: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 65534
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
+      nodeSelector:
+        kubernetes.io/os: linux
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8-ldap-configmap
+  namespace: k8-ldap-configmap
+  labels:
+    app.kubernetes.io/name: k8-ldap-configmap
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/path: /metrics
+    prometheus.io/port: '8080'
+spec:
+  type: ClusterIP
+  ports:
+  - name: metrics
+    port: 8080
+    targetPort: metrics
+  selector:
+    app.kubernetes.io/name: k8-ldap-configmap

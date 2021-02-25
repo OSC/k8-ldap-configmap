@@ -1,0 +1,5 @@
+/k8-ldap-configmap
+/coverage.txt
+*.tar.gz
+/dist
+/release

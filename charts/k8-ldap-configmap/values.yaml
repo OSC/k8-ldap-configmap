@@ -1,0 +1,79 @@
+# Default values for k8-ldap-configmap.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+ldapUrl: ''
+ldapTLS: false
+ldapTLSVerify: true
+ldapTLSCACert: ''
+ldapGroupBaseDN: ''
+ldapUserBaseDN: ''
+ldapBindDN: ''
+ldapBindPassword: ''
+ldapGroupFilter: '(objectClass=posixGroup)'
+ldapUserFilter: '(objectClass=posixAccount)'
+ldapMemberScheme: memberof
+ldapUserAttrMap: name=uid,uid=uidNumber,gid=gidNumber
+ldapGroupAttrMap: name=cn,gid=gidNumber
+mappers: user-uid,user-gid
+userPrefix: ''
+interval: 5m
+# Set namespace of generated ConfigMaps
+# Defaults to namespace of Chart release
+namespaceConfigMap: ""
+
+extraArgs: []
+
+image:
+  repository: docker.io/ohiosupercomputer/k8-ldap-configmap
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - all
+  privileged: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 65534
+
+service:
+  # Specifies whether a service should be created
+  create: true
+  type: ClusterIP
+  port: 8080
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/path: /metrics
+
+resources:
+  limits:
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 50Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
