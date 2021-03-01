@@ -16,13 +16,10 @@ package ldap
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"io/ioutil"
 	"net"
 	"net/url"
-	"strings"
 
 	"github.com/OSC/k8-ldap-configmap/internal/config"
-	"github.com/OSC/k8-ldap-configmap/internal/utils"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	ldap "github.com/go-ldap/ldap/v3"
@@ -69,18 +66,8 @@ func LDAPTLS(l *ldap.Conn, config *config.Config, logger log.Logger) error {
 		ServerName:         host,
 	}
 	if config.LdapTLSCACert != "" {
-		var caCert []byte
-		if strings.HasPrefix(config.LdapTLSCACert, "/") && utils.FileExists(config.LdapTLSCACert) {
-			caCert, err = ioutil.ReadFile(config.LdapTLSCACert)
-			if err != nil {
-				level.Error(logger).Log("msg", "Failed to read CA certificate", "ca-certificate", config.LdapTLSCACert, "err", err)
-				return err
-			}
-		} else {
-			caCert = []byte(config.LdapTLSCACert)
-		}
 		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
+		caCertPool.AppendCertsFromPEM([]byte(config.LdapTLSCACert))
 		tlsConfig.RootCAs = caCertPool
 	}
 	level.Debug(logger).Log("msg", "Performing Start TLS with LDAP server")

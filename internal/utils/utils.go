@@ -14,7 +14,6 @@
 package utils
 
 import (
-	"os"
 	"strings"
 )
 
@@ -45,12 +44,4 @@ func AttrMap(strMap string) map[string]string {
 		attrMap[parts[0]] = parts[1]
 	}
 	return attrMap
-}
-
-func FileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
 }
