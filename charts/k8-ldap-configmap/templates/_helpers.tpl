@@ -54,5 +54,18 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "k8-ldap-configmap.serviceAccountName" -}}
-{{- default (include "k8-ldap-configmap.fullname" .) .Values.serviceAccount.name }}
+{{- if .Values.rbac.serviceAccount.create }}
+{{- default (include "k8-ldap-configmap.fullname" .) .Values.rbac.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.rbac.serviceAccount.name }}
 {{- end }}
+{{- end }}
+
+{{/* Get the namespace name */}}
+{{- define "k8-ldap-configmap.namespace" -}}
+{{- if .Values.namespace }}
+  {{- .Values.namespace -}}
+{{- else -}}
+  {{- .Release.Namespace -}}
+{{- end -}}
+{{- end -}}

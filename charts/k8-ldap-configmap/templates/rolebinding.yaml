@@ -1,8 +1,9 @@
+{{- if .Values.rbac.create }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ include "k8-ldap-configmap.fullname" . }}
-  namespace: {{ .Values.namespaceConfigMap | default .Release.Namespace | quote }}
+  namespace: {{ .Values.namespaceConfigMap | default (include "k8-ldap-configmap.namespace" .) }}
   labels:
     {{- include "k8-ldap-configmap.labels" . | nindent 4 }}
 roleRef:
@@ -12,4 +13,5 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: {{ include "k8-ldap-configmap.serviceAccountName" . }}
-  namespace: {{ .Release.Namespace | quote }}
+  namespace: {{ include "k8-ldap-configmap.namespace" . }}
+{{- end }}
