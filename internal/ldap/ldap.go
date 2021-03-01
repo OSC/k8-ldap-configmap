@@ -69,7 +69,7 @@ func LDAPTLS(l *ldap.Conn, config *config.Config, logger log.Logger) error {
 		ServerName:         host,
 	}
 	if config.LdapTLSCACert != "" {
-		caCert := []byte{}
+		var caCert []byte
 		if strings.HasPrefix(config.LdapTLSCACert, "/") && utils.FileExists(config.LdapTLSCACert) {
 			caCert, err = ioutil.ReadFile(config.LdapTLSCACert)
 			if err != nil {
