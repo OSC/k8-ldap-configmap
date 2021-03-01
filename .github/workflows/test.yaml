@@ -113,6 +113,9 @@ jobs:
           sed -i \
             -e 's|tag:.*|tag: latest|g' \
             -e 's|repository:.*|repository: kind-registry:5000/k8-ldap-configmap|g' \
+            -e 's|ldapUrl:.*|ldapUrl: ldap://openldap:389|g' \
+            -e 's|ldapGroupBaseDN:.*|ldapGroupBaseDN: dc=test|g' \
+            -e 's|ldapUserBaseDN:.*|ldapUserBaseDN: dc=test|g' \
             charts/k8-ldap-configmap/values.yaml
           cat charts/k8-ldap-configmap/values.yaml
       - name: Run chart-testing (install)
