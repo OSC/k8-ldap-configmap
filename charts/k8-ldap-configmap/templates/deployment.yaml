@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "k8-ldap-configmap.fullname" . }}
+  namespace: {{ include "k8-ldap-configmap.namespace" . }}
+  labels:
+    {{- include "k8-ldap-configmap.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "k8-ldap-configmap.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "k8-ldap-configmap.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "k8-ldap-configmap.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+         {{- if or .Values.ldapBindPassword .Values.ldapTLSCACert }}
+          env:
+          {{- if .Values.ldapBindPassword }}
+          - name: LDAP_BIND_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "k8-ldap-configmap.fullname" . }}
+                key: ldap-bind-password
+          {{- end }}
+          {{- if .Values.ldapTLSCACert }}
+          - name: LDAP_TLS_CA_CERT
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "k8-ldap-configmap.fullname" . }}
+                key: ldap-tls-ca-cert
+          {{- end }}
+          {{- end }}
+          args:
+            {{- if .Values.ldapUrl }}
+            - --ldap-url={{ .Values.ldapUrl }}
+            {{- end }}
+            {{- if .Values.ldapTLS }}
+            - --ldap-tls
+            {{- else }}
+            - --no-ldap-tls
+            {{- end }}
+            {{- if .Values.ldapTLSVerify }}
+            - --ldap-tls-verify
+            {{- else }}
+            - --no-ldap-tls-verify
+            {{- end }}
+            {{- if .Values.ldapGroupBaseDN }}
+            - --ldap-group-base-dn={{ .Values.ldapGroupBaseDN }}
+            {{- end }}
+            {{- if .Values.ldapUserBaseDN }}
+            - --ldap-user-base-dn={{ .Values.ldapUserBaseDN }}
+            {{- end }}
+            {{- if .Values.ldapBindDN }}
+            - --ldap-bind-dn={{ .Values.ldapBindDN }}
+            {{- end }}
+            {{- if .Values.ldapGroupFilter }}
+            - --ldap-group-filter={{ .Values.ldapGroupFilter }}
+            {{- end }}
+            {{- if .Values.ldapUserFilter }}
+            - --ldap-user-filter={{ .Values.ldapUserFilter }}
+            {{- end }}
+            {{- if .Values.ldapMemberScheme }}
+            - --ldap-member-scheme={{ .Values.ldapMemberScheme }}
+            {{- end }}
+            {{- if .Values.ldapUserAttrMap }}
+            - --ldap-user-attr-map={{ .Values.ldapUserAttrMap }}
+            {{- end }}
+            {{- if .Values.ldapGroupAttrMap }}
+            - --ldap-group-attr-map={{ .Values.ldapGroupAttrMap }}
+            {{- end }}
+            {{- if .Values.mappers }}
+            - --mappers={{ .Values.mappers }}
+            {{- end }}
+            - --namespace={{ .Values.namespaceConfigMap | default .Release.Namespace }}
+            {{- if .Values.userPrefix }}
+            - --user-prefix={{ .Values.userPrefix }}
+            {{- end }}
+            {{- if .Values.interval }}
+            - --interval={{ .Values.interval }}
+            {{- end }}
+            - --listen-address=:{{ .Values.service.port }}
+            {{- with .Values.extraArgs }}
+            {{ toYaml . | indent 12 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
