@@ -84,9 +84,6 @@ func RequiredAttrs(attrType string, enabledMappers []string) []string {
 
 func ParseDN(dn string) string {
 	elements := strings.Split(dn, ",")
-	if len(elements) < 1 {
-		return ""
-	}
 	nameElement := elements[0]
 	name := strings.Split(nameElement, "=")
 	if len(name) != 2 {

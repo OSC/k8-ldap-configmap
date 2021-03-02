@@ -1,4 +1,4 @@
-[![CI Status](https://github.com/OSC/k8-ldap-configmap/workflows/test/badge.svg?branch=main)](https://github.com/OSC/k8-ldap-configmap/actions?query=workflow%3Atest)
+[![CI Status](https://github.com/OSC/k8-ldap-configmap/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/OSC/k8-ldap-configmap/actions?query=workflow%3Atest)
 [![GitHub release](https://img.shields.io/github/v/release/OSC/k8-ldap-configmap?include_prereleases&sort=semver)](https://github.com/OSC/k8-ldap-configmap/releases/latest)
 ![GitHub All Releases](https://img.shields.io/github/downloads/OSC/k8-ldap-configmap/total)
 ![Docker Pulls](https://img.shields.io/docker/pulls/ohiosupercomputer/k8-ldap-configmap)
@@ -25,7 +25,7 @@ Currently this code is built and tested against Kubernetes 1.19.
 
 ### Install with Helm
 
-Only Helm >= 3.2.0 is supported.
+Only Helm 3 is supported.
 
 ```
 helm repo add k8-ldap-configmap https://osc.github.io/k8-ldap-configmap
