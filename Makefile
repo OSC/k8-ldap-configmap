@@ -26,7 +26,9 @@ test:
 	GO111MODULE=on GOOS=$(GOOS) GOARCH=$(GOARCH) go test -race ./...
 
 coverage:
-	GO111MODULE=on GOOS=$(GOOS) GOARCH=$(GOARCH) go test -race -coverpkg=./... -coverprofile=coverage.txt -covermode=atomic ./...
+	GO111MODULE=on GOOS=$(GOOS) GOARCH=$(GOARCH) go test -race -coverpkg=./... -coverprofile=coverage.txt.tmp -covermode=atomic ./...
+	cat coverage.txt.tmp | grep -v "test" > coverage.txt
+	rm -f coverage.txt.tmp
 
 unused:
 	@echo ">> running check for unused/missing packages in go.mod"
