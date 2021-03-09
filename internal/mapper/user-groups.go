@@ -50,8 +50,6 @@ func (m UserGroups) ConfigMapName() string {
 
 func (m UserGroups) GetData(users *ldap.SearchResult, groups *ldap.SearchResult) (map[string]string, error) {
 	level.Debug(m.logger).Log("msg", "Mapper running")
-	userNames := []string{}
-	groupNames := []string{}
 	userDNs := make(map[string]string)
 	groupDNs := make(map[string]string)
 	gidToGroup := make(map[string]string)
@@ -61,18 +59,16 @@ func (m UserGroups) GetData(users *ldap.SearchResult, groups *ldap.SearchResult)
 	for _, entry := range users.Entries {
 		name := entry.GetAttributeValue(m.config.UserAttrMap["name"])
 		userDNs[entry.DN] = name
-		userNames = append(userNames, name)
 	}
 
 	for _, entry := range groups.Entries {
 		name := entry.GetAttributeValue(m.config.GroupAttrMap["name"])
 		gid := entry.GetAttributeValue(m.config.GroupAttrMap["gid"])
 		groupDNs[entry.DN] = name
-		groupNames = append(groupNames, name)
 		gidToGroup[gid] = name
 		members := []string{}
 		if m.config.MemberScheme == "member" {
-			members = m.GetGroupsMember(entry.GetAttributeValues("member"), userNames, userDNs)
+			members = m.GetGroupsMember(entry.GetAttributeValues("member"), userDNs)
 		} else if m.config.MemberScheme == "memberuid" {
 			members = entry.GetAttributeValues("memberUid")
 		}
@@ -93,7 +89,7 @@ func (m UserGroups) GetData(users *ldap.SearchResult, groups *ldap.SearchResult)
 		}
 		var groups []string
 		if m.config.MemberScheme == "memberof" {
-			groups = m.GetGroupsMemberOf(entry.GetAttributeValues("memberOf"), groupNames, groupDNs)
+			groups = m.GetGroupsMemberOf(entry.GetAttributeValues("memberOf"), groupDNs)
 		} else if g, ok := userGroups[name]; ok {
 			groups = g
 		}
@@ -111,33 +107,21 @@ func (m UserGroups) GetData(users *ldap.SearchResult, groups *ldap.SearchResult)
 	return data, nil
 }
 
-func (m UserGroups) GetGroupsMemberOf(memberOf []string, groupNames []string, groupDNs map[string]string) []string {
+func (m UserGroups) GetGroupsMemberOf(memberOf []string, groupDNs map[string]string) []string {
 	groups := []string{}
 	for _, m := range memberOf {
-		var name string
 		if val, ok := groupDNs[m]; ok {
-			name = val
-		} else {
-			name = ParseDN(m)
-		}
-		if utils.SliceContains(groupNames, name) {
-			groups = append(groups, name)
+			groups = append(groups, val)
 		}
 	}
 	return groups
 }
 
-func (m UserGroups) GetGroupsMember(members []string, userNames []string, userDNs map[string]string) []string {
+func (m UserGroups) GetGroupsMember(members []string, userDNs map[string]string) []string {
 	users := []string{}
 	for _, m := range members {
-		var name string
 		if val, ok := userDNs[m]; ok {
-			name = val
-		} else {
-			name = ParseDN(m)
-		}
-		if utils.SliceContains(userNames, name) {
-			users = append(users, name)
+			users = append(users, val)
 		}
 	}
 	return users
