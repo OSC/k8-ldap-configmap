@@ -126,3 +126,37 @@ func TestGetDataMember(t *testing.T) {
 		t.Errorf("Unexpected value for testuser2, got:%s", val)
 	}
 }
+
+func TestGetDataMemberUID(t *testing.T) {
+	_config.MemberScheme = "memberuid"
+	mapper := NewUserGroupsMapper(_config, log.NewNopLogger())
+	l, err := ldap.LDAPConnect(_config, log.NewNopLogger())
+	if err != nil {
+		t.Fatal(err)
+	}
+	users, err := ldap.LDAPUsers(l, _config, log.NewNopLogger())
+	if err != nil {
+		t.Fatal(err)
+	}
+	groups, err := ldap.LDAPGroups(l, _config, log.NewNopLogger())
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := mapper.GetData(users, groups)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(data) != 4 {
+		t.Errorf("Unexpected length of data, got: %d", len(data))
+	}
+	if val, ok := data["testuser1"]; !ok {
+		t.Errorf("testuser1 not found in data")
+	} else if val != "[\"testgroup1\"]" {
+		t.Errorf("Unexpected value for testuser1, got:%s", val)
+	}
+	if val, ok := data["testuser2"]; !ok {
+		t.Errorf("testuser2 not found in data")
+	} else if val != "[\"testgroup1\",\"testgroup2\"]" {
+		t.Errorf("Unexpected value for testuser2, got:%s", val)
+	}
+}

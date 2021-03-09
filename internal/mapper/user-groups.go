@@ -78,9 +78,6 @@ func (m UserGroups) GetData(users *ldap.SearchResult, groups *ldap.SearchResult)
 		}
 		for _, member := range members {
 			groups := []string{}
-			if g, ok := userGroups[member]; ok {
-				groups = append(groups, g...)
-			}
 			groups = append(groups, name)
 			userGroups[member] = groups
 		}

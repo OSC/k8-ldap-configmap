@@ -72,6 +72,15 @@ func clientset() kubernetes.Interface {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "test",
 		},
+	}, &v1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "user-uid",
+			Namespace: "test",
+		},
 	})
 	return clientset
 }
@@ -261,5 +270,38 @@ func TestValidateArgs(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "ldap-bind") {
 		t.Errorf("Expected error about missing bind args")
+	}
+}
+
+func TestSetupLogging(t *testing.T) {
+	levels := []string{"debug", "info", "warn", "error"}
+	for _, l := range levels {
+		args := []string{fmt.Sprintf("--log-level=%s", l)}
+		args = append(baseArgs, args...)
+		if _, err := kingpin.CommandLine.Parse(args); err != nil {
+			t.Fatal(err)
+		}
+		logger := setupLogging()
+		if logger == nil {
+			t.Errorf("Unexpected error getting logger")
+		}
+	}
+	args := []string{"--log-format=json"}
+	args = append(baseArgs, args...)
+	if _, err := kingpin.CommandLine.Parse(args); err != nil {
+		t.Fatal(err)
+	}
+	logger := setupLogging()
+	if logger == nil {
+		t.Errorf("Unexpected error getting logger")
+	}
+	args = []string{"--log-level=foo"}
+	args = append(baseArgs, args...)
+	if _, err := kingpin.CommandLine.Parse(args); err != nil {
+		t.Fatal(err)
+	}
+	logger = setupLogging()
+	if logger != nil {
+		t.Errorf("Expected an error getting logger")
 	}
 }
