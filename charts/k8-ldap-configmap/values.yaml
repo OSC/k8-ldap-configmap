@@ -15,7 +15,9 @@ ldapUserFilter: '(objectClass=posixAccount)'
 ldapMemberScheme: memberof
 ldapUserAttrMap: name=uid,uid=uidNumber,gid=gidNumber
 ldapGroupAttrMap: name=cn,gid=gidNumber
-mappers: user-uid,user-gid
+mappers:
+  - user-uid
+  - user-gid
 userPrefix: ''
 interval: 5m
 # Set namespace of generated ConfigMaps

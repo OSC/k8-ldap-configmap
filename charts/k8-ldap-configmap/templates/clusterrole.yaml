@@ -15,4 +15,8 @@ rules:
   - get
   - create
   - update
+  resourceNames:
+{{- range .Values.mappers }}
+  - {{ printf "%s-map" . }}
+{{- end }}
 {{- end }}
