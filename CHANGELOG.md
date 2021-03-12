@@ -1,3 +1,7 @@
+## v0.3.0 / 2021-03-12
+
+* Add last run metric
+
 ## v0.2.0 / 2021-03-12
 
 * Define mappers in Helm using array
