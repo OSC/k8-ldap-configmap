@@ -86,9 +86,7 @@ spec:
             {{- if .Values.ldapGroupAttrMap }}
             - --ldap-group-attr-map={{ .Values.ldapGroupAttrMap }}
             {{- end }}
-            {{- if .Values.mappers }}
-            - --mappers={{ .Values.mappers }}
-            {{- end }}
+            - --mappers={{ join "," .Values.mappers }}
             - --namespace={{ .Values.namespaceConfigMap | default .Release.Namespace }}
             {{- if .Values.userPrefix }}
             - --user-prefix={{ .Values.userPrefix }}
