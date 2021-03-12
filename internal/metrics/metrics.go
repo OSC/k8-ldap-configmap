@@ -50,6 +50,11 @@ var (
 		Name:      "run_duration_seconds",
 		Help:      "Last runtime duration in seconds",
 	})
+	MetricLastRun = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace: metricsNamespace,
+		Name:      "last_run_timestamp_seconds",
+		Help:      "Last timestamp of execution",
+	})
 	MetricConfigMapSize = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: metricsNamespace,
 		Name:      "size_bytes",
@@ -72,6 +77,7 @@ func MetricGathers(processMetrics bool) prometheus.Gatherers {
 	registry.MustRegister(MetricError)
 	registry.MustRegister(MetricErrorsTotal)
 	registry.MustRegister(MetricDuration)
+	registry.MustRegister(MetricLastRun)
 	registry.MustRegister(MetricConfigMapSize)
 	registry.MustRegister(MetricConfigMapKeys)
 	gatherers := prometheus.Gatherers{registry}
