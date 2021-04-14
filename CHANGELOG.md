@@ -1,4 +1,4 @@
-## Unreleased
+## v0.4.0 / 2021-04-14
 
 * Update Kubernetes Go dependencies to 0.20.5 (Kubernetes 1.20)
 * Upgrade to Go 1.16
