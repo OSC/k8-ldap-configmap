@@ -1,6 +1,6 @@
 module github.com/OSC/k8-ldap-configmap
 
-go 1.15
+go 1.16
 
 require (
 	github.com/go-kit/kit v0.10.0
