@@ -29,7 +29,6 @@ checksum:
   name_template: 'checksums.txt'
 release:
   prerelease: auto
-  draft: true
   extra_files:
     - glob: ./release/*.yaml
 changelog:
