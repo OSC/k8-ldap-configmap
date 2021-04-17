@@ -61,7 +61,6 @@ func TestMain(m *testing.M) {
 	time.Sleep(1 * time.Second)
 
 	exitVal := m.Run()
-	server.Stop()
 	os.Exit(exitVal)
 }
 
