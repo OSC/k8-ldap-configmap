@@ -26,8 +26,13 @@ rules:
   resources:
   - configmaps
   verbs:
-  - get
   - create
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
   - update
   resourceNames:
   - user-uid-map
