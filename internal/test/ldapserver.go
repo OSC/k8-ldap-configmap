@@ -186,9 +186,9 @@ func handleSearchUser(w ldap.ResponseWriter, m *ldap.Message) {
 			"uidNumber":   []string{"1000"},
 			"gidNumber":   []string{"1000"},
 			"memberOf": []string{
-				fmt.Sprintf("cn=testgroup1,%s", GroupBaseDN),
-				fmt.Sprintf("cn=testgroup2,%s", GroupBaseDN),
-				fmt.Sprintf("cn=testgroup3,%s", GroupBaseDN),
+				fmt.Sprintf("cn=Testgroup1,%s", GroupBaseDN),
+				fmt.Sprintf("cn=Testgroup2,%s", GroupBaseDN),
+				fmt.Sprintf("cn=Testgroup3,%s", GroupBaseDN),
 			},
 		},
 		"testuser2": {
@@ -196,7 +196,7 @@ func handleSearchUser(w ldap.ResponseWriter, m *ldap.Message) {
 			"uidNumber":   []string{"1001"},
 			"gidNumber":   []string{"1000"},
 			"memberOf": []string{
-				fmt.Sprintf("cn=testgroup2,%s", GroupBaseDN),
+				fmt.Sprintf("cn=Testgroup2,%s", GroupBaseDN),
 			},
 		},
 		"testuser3": {
@@ -204,7 +204,7 @@ func handleSearchUser(w ldap.ResponseWriter, m *ldap.Message) {
 			"uidNumber":   []string{"1002"},
 			"gidNumber":   []string{"1001"},
 			"memberOf": []string{
-				fmt.Sprintf("cn=testgroup2,%s", GroupBaseDN),
+				fmt.Sprintf("cn=Testgroup2,%s", GroupBaseDN),
 			},
 		},
 		"testuser4": {
