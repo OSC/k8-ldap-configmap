@@ -1,3 +1,7 @@
+## Unreleased
+
+* Make memberof user-groups mapping ignore case
+
 ## v0.4.1 / 2021-04-16
 
 * Fix create RBAC

@@ -16,6 +16,7 @@ package mapper
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/OSC/k8-ldap-configmap/internal/config"
 	"github.com/OSC/k8-ldap-configmap/internal/utils"
@@ -58,13 +59,13 @@ func (m UserGroups) GetData(users *ldap.SearchResult, groups *ldap.SearchResult)
 
 	for _, entry := range users.Entries {
 		name := entry.GetAttributeValue(m.config.UserAttrMap["name"])
-		userDNs[entry.DN] = name
+		userDNs[strings.ToLower(entry.DN)] = name
 	}
 
 	for _, entry := range groups.Entries {
 		name := entry.GetAttributeValue(m.config.GroupAttrMap["name"])
 		gid := entry.GetAttributeValue(m.config.GroupAttrMap["gid"])
-		groupDNs[entry.DN] = name
+		groupDNs[strings.ToLower(entry.DN)] = name
 		gidToGroup[gid] = name
 		members := []string{}
 		if m.config.MemberScheme == "member" {
@@ -110,7 +111,7 @@ func (m UserGroups) GetData(users *ldap.SearchResult, groups *ldap.SearchResult)
 func (m UserGroups) GetGroupsMemberOf(memberOf []string, groupDNs map[string]string) []string {
 	groups := []string{}
 	for _, m := range memberOf {
-		if val, ok := groupDNs[m]; ok {
+		if val, ok := groupDNs[strings.ToLower(m)]; ok {
 			groups = append(groups, val)
 		}
 	}
@@ -120,7 +121,7 @@ func (m UserGroups) GetGroupsMemberOf(memberOf []string, groupDNs map[string]str
 func (m UserGroups) GetGroupsMember(members []string, userDNs map[string]string) []string {
 	users := []string{}
 	for _, m := range members {
-		if val, ok := userDNs[m]; ok {
+		if val, ok := userDNs[strings.ToLower(m)]; ok {
 			users = append(users, val)
 		}
 	}
