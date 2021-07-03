@@ -1,4 +1,4 @@
-## Unreleased
+## v0.4.2 / 2021-07-03
 
 * Make memberof user-groups mapping ignore case
 
