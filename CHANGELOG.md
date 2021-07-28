@@ -1,4 +1,4 @@
-## Unreleased
+## v0.5.0 / 2021-07-28
 
 * Add user-gids mapper
 
