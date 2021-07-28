@@ -14,6 +14,7 @@
 package mapper
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/OSC/k8-ldap-configmap/internal/config"
@@ -33,6 +34,11 @@ type Mapper interface {
 	Name() string
 	ConfigMapName() string
 	GetData(users *ldap.SearchResult, groups *ldap.SearchResult) (map[string]string, error)
+}
+
+type Group struct {
+	name string
+	gid  string
 }
 
 func registerMapper(name string, requiredUser []string, requiredGroup []string, factory func(config *config.Config, logger log.Logger) Mapper) {
@@ -90,4 +96,90 @@ func ParseDN(dn string) string {
 		return ""
 	}
 	return name[1]
+}
+
+func GetUserGroups(users *ldap.SearchResult, groups *ldap.SearchResult, config *config.Config) (map[string][]Group, error) {
+	userDNs := make(map[string]string)
+	groupDNs := make(map[string]string)
+	groupToGid := make(map[string]string)
+	gidToGroup := make(map[string]string)
+	userGroups := make(map[string][]string)
+	data := make(map[string][]Group)
+
+	for _, entry := range users.Entries {
+		name := entry.GetAttributeValue(config.UserAttrMap["name"])
+		userDNs[strings.ToLower(entry.DN)] = name
+	}
+
+	for _, entry := range groups.Entries {
+		name := entry.GetAttributeValue(config.GroupAttrMap["name"])
+		gid := entry.GetAttributeValue(config.GroupAttrMap["gid"])
+		groupDNs[strings.ToLower(entry.DN)] = name
+		groupToGid[name] = gid
+		gidToGroup[gid] = name
+		members := []string{}
+		if config.MemberScheme == "member" {
+			members = GetGroupsMember(entry.GetAttributeValues("member"), userDNs)
+		} else if config.MemberScheme == "memberuid" {
+			members = entry.GetAttributeValues("memberUid")
+		}
+		for _, member := range members {
+			groups := []string{}
+			groups = append(groups, name)
+			userGroups[member] = groups
+		}
+	}
+
+	for _, entry := range users.Entries {
+		name := entry.GetAttributeValue(config.UserAttrMap["name"])
+		key := fmt.Sprintf("%s%s", config.UserPrefix, name)
+		gid := entry.GetAttributeValue(config.UserAttrMap["gid"])
+		var primaryGroup string
+		if g, ok := gidToGroup[gid]; ok {
+			primaryGroup = g
+		}
+		var groups []string
+		if config.MemberScheme == "memberof" {
+			groups = GetGroupsMemberOf(entry.GetAttributeValues("memberOf"), groupDNs)
+		} else if g, ok := userGroups[name]; ok {
+			groups = g
+		}
+		if !utils.SliceContains(groups, primaryGroup) && primaryGroup != "" {
+			groups = append([]string{primaryGroup}, groups...)
+		}
+		userGroups[key] = groups
+	}
+
+	for user, groupNames := range userGroups {
+		groups := []Group{}
+		for _, groupName := range groupNames {
+			group := Group{name: groupName}
+			if gid, ok := groupToGid[groupName]; ok {
+				group.gid = gid
+			}
+			groups = append(groups, group)
+		}
+		data[user] = groups
+	}
+	return data, nil
+}
+
+func GetGroupsMemberOf(memberOf []string, groupDNs map[string]string) []string {
+	groups := []string{}
+	for _, m := range memberOf {
+		if val, ok := groupDNs[strings.ToLower(m)]; ok {
+			groups = append(groups, val)
+		}
+	}
+	return groups
+}
+
+func GetGroupsMember(members []string, userDNs map[string]string) []string {
+	users := []string{}
+	for _, m := range members {
+		if val, ok := userDNs[strings.ToLower(m)]; ok {
+			users = append(users, val)
+		}
+	}
+	return users
 }

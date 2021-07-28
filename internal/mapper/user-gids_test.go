@@ -20,9 +20,9 @@ import (
 	"github.com/go-kit/kit/log"
 )
 
-func TestGetDataMemberOf(t *testing.T) {
+func TestGetUserGIDsDataMemberOf(t *testing.T) {
 	_config.MemberScheme = "memberof"
-	mapper := NewUserGroupsMapper(_config, log.NewNopLogger())
+	mapper := NewUserGIDsMapper(_config, log.NewNopLogger())
 	l, err := ldap.LDAPConnect(_config, log.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
@@ -44,14 +44,14 @@ func TestGetDataMemberOf(t *testing.T) {
 	}
 	if val, ok := data["testuser1"]; !ok {
 		t.Errorf("testuser1 not found in data")
-	} else if val != "[\"testgroup1\",\"testgroup2\"]" {
+	} else if val != "[\"1000\",\"1001\"]" {
 		t.Errorf("Unexpected value, got:%s", val)
 	}
 }
 
-func TestGetDataMember(t *testing.T) {
+func TestGetUserGIDsDataMember(t *testing.T) {
 	_config.MemberScheme = "member"
-	mapper := NewUserGroupsMapper(_config, log.NewNopLogger())
+	mapper := NewUserGIDsMapper(_config, log.NewNopLogger())
 	l, err := ldap.LDAPConnect(_config, log.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
@@ -73,19 +73,19 @@ func TestGetDataMember(t *testing.T) {
 	}
 	if val, ok := data["testuser1"]; !ok {
 		t.Errorf("testuser1 not found in data")
-	} else if val != "[\"testgroup1\"]" {
+	} else if val != "[\"1000\"]" {
 		t.Errorf("Unexpected value for testuser1, got:%s", val)
 	}
 	if val, ok := data["testuser2"]; !ok {
 		t.Errorf("testuser2 not found in data")
-	} else if val != "[\"testgroup1\",\"testgroup2\"]" {
+	} else if val != "[\"1000\",\"1001\"]" {
 		t.Errorf("Unexpected value for testuser2, got:%s", val)
 	}
 }
 
-func TestGetDataMemberUID(t *testing.T) {
+func TestGetUserGIDsDataMemberUID(t *testing.T) {
 	_config.MemberScheme = "memberuid"
-	mapper := NewUserGroupsMapper(_config, log.NewNopLogger())
+	mapper := NewUserGIDsMapper(_config, log.NewNopLogger())
 	l, err := ldap.LDAPConnect(_config, log.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
@@ -107,12 +107,12 @@ func TestGetDataMemberUID(t *testing.T) {
 	}
 	if val, ok := data["testuser1"]; !ok {
 		t.Errorf("testuser1 not found in data")
-	} else if val != "[\"testgroup1\"]" {
+	} else if val != "[\"1000\"]" {
 		t.Errorf("Unexpected value for testuser1, got:%s", val)
 	}
 	if val, ok := data["testuser2"]; !ok {
 		t.Errorf("testuser2 not found in data")
-	} else if val != "[\"testgroup1\",\"testgroup2\"]" {
+	} else if val != "[\"1000\",\"1001\"]" {
 		t.Errorf("Unexpected value for testuser2, got:%s", val)
 	}
 }
