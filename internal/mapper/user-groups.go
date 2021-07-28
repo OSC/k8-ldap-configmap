@@ -48,7 +48,7 @@ func (m UserGroups) ConfigMapName() string {
 
 func (m UserGroups) GetData(users *ldap.SearchResult, groups *ldap.SearchResult) (map[string]string, error) {
 	level.Debug(m.logger).Log("msg", "Mapper running")
-	data, err := GetUserGroups(users, groups, m.config)
+	data, err := GetUserGroups(users, groups, m.config, m.logger)
 	if err != nil {
 		return nil, err
 	}

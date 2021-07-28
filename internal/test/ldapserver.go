@@ -16,8 +16,8 @@ package test
 import (
 	"crypto/tls"
 	"fmt"
+	"io"
 	"log"
-	"os"
 
 	"github.com/lor00x/goldap/message"
 	ldap "github.com/vjeantet/ldapserver"
@@ -93,7 +93,8 @@ mfc9r598/by35iVqsCWBf2o3/Q==
 `)
 
 func LdapServer() *ldap.Server {
-	ldap.Logger = log.New(os.Stdout, "[server] ", log.LstdFlags)
+	//ldap.Logger = log.New(os.Stdout, "[server] ", log.LstdFlags)
+	ldap.Logger = log.New(io.Discard, "[server] ", log.LstdFlags)
 	server := ldap.NewServer()
 	routes := ldap.NewRouteMux()
 	//routes.NotFound(handleNotFound)
@@ -144,7 +145,7 @@ func handleSearchGroup(w ldap.ResponseWriter, m *ldap.Message) {
 	data := map[string]map[string][]string{
 		"testgroup1": {
 			"objectClass": []string{"posixGroup"},
-			"gidNumber":   []string{"1000"},
+			"gidNumber":   []string{"1001"},
 			"memberUid":   []string{"testuser1", "testuser3"},
 			"member": []string{
 				fmt.Sprintf("cn=testuser1,%s", UserBaseDN),
@@ -153,7 +154,7 @@ func handleSearchGroup(w ldap.ResponseWriter, m *ldap.Message) {
 		},
 		"testgroup2": {
 			"objectClass": []string{"posixGroup"},
-			"gidNumber":   []string{"1001"},
+			"gidNumber":   []string{"1000"},
 			"memberUid":   []string{"testuser2", "testuser4"},
 			"member": []string{
 				fmt.Sprintf("cn=testuser2,%s", UserBaseDN),
@@ -184,7 +185,7 @@ func handleSearchUser(w ldap.ResponseWriter, m *ldap.Message) {
 		"testuser1": {
 			"objectClass": []string{"posixAccount"},
 			"uidNumber":   []string{"1000"},
-			"gidNumber":   []string{"1000"},
+			"gidNumber":   []string{"1001"},
 			"memberOf": []string{
 				fmt.Sprintf("cn=Testgroup1,%s", GroupBaseDN),
 				fmt.Sprintf("cn=Testgroup2,%s", GroupBaseDN),
@@ -194,7 +195,7 @@ func handleSearchUser(w ldap.ResponseWriter, m *ldap.Message) {
 		"testuser2": {
 			"objectClass": []string{"posixAccount"},
 			"uidNumber":   []string{"1001"},
-			"gidNumber":   []string{"1000"},
+			"gidNumber":   []string{"1001"},
 			"memberOf": []string{
 				fmt.Sprintf("cn=Testgroup2,%s", GroupBaseDN),
 			},
@@ -202,7 +203,7 @@ func handleSearchUser(w ldap.ResponseWriter, m *ldap.Message) {
 		"testuser3": {
 			"objectClass": []string{"posixAccount"},
 			"uidNumber":   []string{"1002"},
-			"gidNumber":   []string{"1001"},
+			"gidNumber":   []string{"1000"},
 			"memberOf": []string{
 				fmt.Sprintf("cn=Testgroup2,%s", GroupBaseDN),
 			},
@@ -210,7 +211,7 @@ func handleSearchUser(w ldap.ResponseWriter, m *ldap.Message) {
 		"testuser4": {
 			"objectClass": []string{"posixAccount"},
 			"uidNumber":   []string{"1003"},
-			"gidNumber":   []string{"1001"},
+			"gidNumber":   []string{"1000"},
 		},
 	}
 	for cn, attrs := range data {

@@ -120,7 +120,7 @@ func TestRun(t *testing.T) {
 	}
 	if val, ok := userGIDMap.Data["testuser2"]; !ok {
 		t.Errorf("Configmap is missing testuser2")
-	} else if val != "1000" {
+	} else if val != "1001" {
 		t.Errorf("Configmap value for testuser2 is incorrect")
 	}
 

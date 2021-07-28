@@ -73,7 +73,7 @@ func TestGetUserGIDsDataMember(t *testing.T) {
 	}
 	if val, ok := data["testuser1"]; !ok {
 		t.Errorf("testuser1 not found in data")
-	} else if val != "[\"1000\"]" {
+	} else if val != "[\"1001\"]" {
 		t.Errorf("Unexpected value for testuser1, got:%s", val)
 	}
 	if val, ok := data["testuser2"]; !ok {
@@ -107,7 +107,7 @@ func TestGetUserGIDsDataMemberUID(t *testing.T) {
 	}
 	if val, ok := data["testuser1"]; !ok {
 		t.Errorf("testuser1 not found in data")
-	} else if val != "[\"1000\"]" {
+	} else if val != "[\"1001\"]" {
 		t.Errorf("Unexpected value for testuser1, got:%s", val)
 	}
 	if val, ok := data["testuser2"]; !ok {
