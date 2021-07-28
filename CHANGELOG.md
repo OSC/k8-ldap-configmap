@@ -1,3 +1,7 @@
+## Unreleased
+
+* Ensure user-gids mapper values are sorted for each user
+
 ## v0.5.0 / 2021-07-28
 
 * Add user-gids mapper

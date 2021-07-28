@@ -15,12 +15,14 @@ package mapper
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/OSC/k8-ldap-configmap/internal/config"
 	"github.com/OSC/k8-ldap-configmap/internal/metrics"
 	"github.com/OSC/k8-ldap-configmap/internal/utils"
 	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	ldap "github.com/go-ldap/ldap/v3"
 )
 
@@ -38,7 +40,7 @@ type Mapper interface {
 
 type Group struct {
 	name string
-	gid  string
+	gid  int
 }
 
 func registerMapper(name string, requiredUser []string, requiredGroup []string, factory func(config *config.Config, logger log.Logger) Mapper) {
@@ -98,7 +100,7 @@ func ParseDN(dn string) string {
 	return name[1]
 }
 
-func GetUserGroups(users *ldap.SearchResult, groups *ldap.SearchResult, config *config.Config) (map[string][]Group, error) {
+func GetUserGroups(users *ldap.SearchResult, groups *ldap.SearchResult, config *config.Config, logger log.Logger) (map[string][]Group, error) {
 	userDNs := make(map[string]string)
 	groupDNs := make(map[string]string)
 	groupToGid := make(map[string]string)
@@ -155,7 +157,12 @@ func GetUserGroups(users *ldap.SearchResult, groups *ldap.SearchResult, config *
 		for _, groupName := range groupNames {
 			group := Group{name: groupName}
 			if gid, ok := groupToGid[groupName]; ok {
-				group.gid = gid
+				gidInt, err := strconv.Atoi(gid)
+				if err != nil {
+					level.Error(logger).Log("msg", "Unable to parse GID to int", "err", err, "group", groupName, "gid", gid)
+					return nil, err
+				}
+				group.gid = gidInt
 			}
 			groups = append(groups, group)
 		}

@@ -15,6 +15,8 @@ package mapper
 
 import (
 	"encoding/json"
+	"sort"
+	"strconv"
 
 	"github.com/OSC/k8-ldap-configmap/internal/config"
 	"github.com/go-kit/kit/log"
@@ -48,17 +50,22 @@ func (m UserGIDs) ConfigMapName() string {
 
 func (m UserGIDs) GetData(users *ldap.SearchResult, groups *ldap.SearchResult) (map[string]string, error) {
 	level.Debug(m.logger).Log("msg", "Mapper running")
-	data, err := GetUserGroups(users, groups, m.config)
+	data, err := GetUserGroups(users, groups, m.config, m.logger)
 	if err != nil {
 		return nil, err
 	}
 	userGIDs := make(map[string]string)
 	for user, groups := range data {
-		groupGIDs := []string{}
+		groupGIDs := []int{}
 		for _, group := range groups {
 			groupGIDs = append(groupGIDs, group.gid)
 		}
-		groupGIDsJSON, _ := json.Marshal(groupGIDs)
+		sort.Ints(groupGIDs)
+		groupGIDsStr := make([]string, len(groupGIDs))
+		for i, gid := range groupGIDs {
+			groupGIDsStr[i] = strconv.Itoa(gid)
+		}
+		groupGIDsJSON, _ := json.Marshal(groupGIDsStr)
 		userGIDs[user] = string(groupGIDsJSON)
 	}
 	level.Debug(m.logger).Log("msg", "Mapper complete", "user-gids", len(userGIDs))
