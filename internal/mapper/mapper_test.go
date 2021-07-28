@@ -14,10 +14,55 @@
 package mapper
 
 import (
+	"fmt"
+	"os"
 	"reflect"
 	"sort"
 	"testing"
+	"time"
+
+	"github.com/OSC/k8-ldap-configmap/internal/config"
+	"github.com/OSC/k8-ldap-configmap/internal/test"
 )
+
+const (
+	ldapserver = "127.0.0.1:10390"
+)
+
+var (
+	_config = &config.Config{
+		LdapURL:     fmt.Sprintf("ldap://%s", ldapserver),
+		GroupBaseDN: test.GroupBaseDN,
+		UserBaseDN:  test.UserBaseDN,
+		BindDN:      test.BindDN,
+		GroupFilter: test.GroupFilter,
+		UserFilter:  test.UserFilter,
+		GroupAttrMap: map[string]string{
+			"name": "cn",
+			"gid":  "gidNumber",
+		},
+		UserAttrMap: map[string]string{
+			"name": "uid",
+			"uid":  "uidNumber",
+			"gid":  "gidNumber",
+		},
+		MemberScheme: "memberof",
+	}
+)
+
+func TestMain(m *testing.M) {
+	server := test.LdapServer()
+	go func() {
+		err := server.ListenAndServe(ldapserver)
+		if err != nil {
+			os.Exit(1)
+		}
+	}()
+	time.Sleep(1 * time.Second)
+
+	exitVal := m.Run()
+	os.Exit(exitVal)
+}
 
 func TestInitRequiredUserAttrs(t *testing.T) {
 	if val, ok := requiredUserAttrs["user-gid"]; !ok {
@@ -34,6 +79,11 @@ func TestInitRequiredUserAttrs(t *testing.T) {
 		t.Errorf("user user-groups key missing")
 	} else if !reflect.DeepEqual(val, []string{"name", "gid"}) {
 		t.Errorf("unexpected required attrs for user user-groups, got %v", val)
+	}
+	if val, ok := requiredUserAttrs["user-gids"]; !ok {
+		t.Errorf("user user-gids key missing")
+	} else if !reflect.DeepEqual(val, []string{"name", "gid"}) {
+		t.Errorf("unexpected required attrs for user user-gids, got %v", val)
 	}
 }
 
@@ -53,10 +103,15 @@ func TestInitRequiredGroupAttrs(t *testing.T) {
 	} else if !reflect.DeepEqual(val, []string{"name", "gid"}) {
 		t.Errorf("unexpected required attrs for group user-groups, got %v", val)
 	}
+	if val, ok := requiredGroupAttrs["user-gids"]; !ok {
+		t.Errorf("group user-gids key missing")
+	} else if !reflect.DeepEqual(val, []string{"name", "gid"}) {
+		t.Errorf("unexpected required attrs for group user-gids, got %v", val)
+	}
 }
 
 func TestValidMappers(t *testing.T) {
-	expected := []string{"user-gid", "user-groups", "user-uid"}
+	expected := []string{"user-gid", "user-groups", "user-uid", "user-gids"}
 	value := ValidMappers()
 	sort.Strings(value)
 	sort.Strings(expected)

@@ -23,44 +23,44 @@ import (
 )
 
 func init() {
-	registerMapper("user-groups", []string{"name", "gid"}, []string{"name", "gid"}, NewUserGroupsMapper)
+	registerMapper("user-gids", []string{"name", "gid"}, []string{"name", "gid"}, NewUserGIDsMapper)
 }
 
-func NewUserGroupsMapper(config *config.Config, logger log.Logger) Mapper {
-	return &UserGroups{
+func NewUserGIDsMapper(config *config.Config, logger log.Logger) Mapper {
+	return &UserGIDs{
 		config: config,
 		logger: logger,
 	}
 }
 
-type UserGroups struct {
+type UserGIDs struct {
 	config *config.Config
 	logger log.Logger
 }
 
-func (m UserGroups) Name() string {
-	return "user-groups"
+func (m UserGIDs) Name() string {
+	return "user-gids"
 }
 
-func (m UserGroups) ConfigMapName() string {
-	return "user-groups-map"
+func (m UserGIDs) ConfigMapName() string {
+	return "user-gids-map"
 }
 
-func (m UserGroups) GetData(users *ldap.SearchResult, groups *ldap.SearchResult) (map[string]string, error) {
+func (m UserGIDs) GetData(users *ldap.SearchResult, groups *ldap.SearchResult) (map[string]string, error) {
 	level.Debug(m.logger).Log("msg", "Mapper running")
 	data, err := GetUserGroups(users, groups, m.config)
 	if err != nil {
 		return nil, err
 	}
-	userGroups := make(map[string]string)
+	userGIDs := make(map[string]string)
 	for user, groups := range data {
-		groupNames := []string{}
+		groupGIDs := []string{}
 		for _, group := range groups {
-			groupNames = append(groupNames, group.name)
+			groupGIDs = append(groupGIDs, group.gid)
 		}
-		userGroupsJSON, _ := json.Marshal(groupNames)
-		userGroups[user] = string(userGroupsJSON)
+		groupGIDsJSON, _ := json.Marshal(groupGIDs)
+		userGIDs[user] = string(groupGIDsJSON)
 	}
-	level.Debug(m.logger).Log("msg", "Mapper complete", "user-groups", len(userGroups))
-	return userGroups, nil
+	level.Debug(m.logger).Log("msg", "Mapper complete", "user-gids", len(userGIDs))
+	return userGIDs, nil
 }

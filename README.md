@@ -16,6 +16,7 @@ This service uses predefined mappers to build the data for each ConfigMap.  Curr
 * user-uid - The key is the username and the value is the user UID
 * user-gid - The Key is the username and the value is the user GID
 * user-groups - The key is the username and the value is JSON string that is array of groups that user is a member of
+* user-gids - The key is the username and the value is JSON string that is array of group GIDs that user is a member of (GIDs are strings)
 
 ## Kubernetes support
 
