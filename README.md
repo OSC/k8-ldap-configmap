@@ -60,6 +60,10 @@ The k8-ldap-configmap is intended to be deployed inside a Kubernetes cluster. It
 
 For Active Directory it's likely paged searches are required so at minimum the `--ldap-paged-search` flag would be required.
 
+The default filters for searching users and groups (`--ldap-user-filter` and `--ldap-group-filter`) can be overridden for specific mappers.
+For example, to override the group filter for `user-gids` mapper: `--mappers-group-filter=user-gids=(objectClass=posixAccount)`.
+Each mapper override must be seperated by a comma.
+
 The following flags and environment variables can modify the behavior of the k8-ldap-configmap:
 
 | Flag    | Environment Variable | Description | Default/Required |
@@ -80,6 +84,8 @@ The following flags and environment variables can modify the behavior of the k8-
 | --ldap-user-attr-map | LDAP_USER_ATTR_MAP | Attribute map for users | `name=uid,uid=uidNumber,gid=gidNumber` |
 | --ldap-group-attr-map | LDAP_GROUP_ATTR_MAP | Attribute map for groups | `name=cn,gid=gidNumber` |
 | --mappers | MAPPERS | The mappers to run | `user-uid,user-gid` |
+| --mappers-group-filter | MAPPERS_GROUP_FILTER | The mapper specific group filters | None (use `--ldap-group-filter`) |
+| --mappers-user-filter | MAPPERS_USER_FILTER | The mapper specific user filters | None (use `--ldap-user-filter`) |
 | --namespace | NAMESPACE | The namespace to write ConfigMaps to | **Required** |
 | --user-prefix | USER_PREFIX | Prefix to add to all username values | None |
 | --interval | INTERLVAL | Interval to run LDAP sync to ConfigMaps | `5m`

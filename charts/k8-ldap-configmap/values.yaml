@@ -18,6 +18,8 @@ ldapGroupAttrMap: name=cn,gid=gidNumber
 mappers:
   - user-uid
   - user-gid
+mappersUserFilter: []
+mappersGroupFilter: []
 userPrefix: ''
 interval: 5m
 # Set namespace of generated ConfigMaps

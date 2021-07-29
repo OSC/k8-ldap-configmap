@@ -27,11 +27,11 @@ func TestGetUserGIDsDataMemberOf(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	users, err := ldap.LDAPUsers(l, _config, log.NewNopLogger())
+	users, err := ldap.LDAPUsers(l, _config.UserFilter, _config, log.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
-	groups, err := ldap.LDAPGroups(l, _config, log.NewNopLogger())
+	groups, err := ldap.LDAPGroups(l, _config.GroupFilter, _config, log.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,11 +56,11 @@ func TestGetUserGIDsDataMember(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	users, err := ldap.LDAPUsers(l, _config, log.NewNopLogger())
+	users, err := ldap.LDAPUsers(l, _config.UserFilter, _config, log.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
-	groups, err := ldap.LDAPGroups(l, _config, log.NewNopLogger())
+	groups, err := ldap.LDAPGroups(l, _config.GroupFilter, _config, log.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,11 +90,11 @@ func TestGetUserGIDsDataMemberUID(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	users, err := ldap.LDAPUsers(l, _config, log.NewNopLogger())
+	users, err := ldap.LDAPUsers(l, _config.UserFilter, _config, log.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
-	groups, err := ldap.LDAPGroups(l, _config, log.NewNopLogger())
+	groups, err := ldap.LDAPGroups(l, _config.GroupFilter, _config, log.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}

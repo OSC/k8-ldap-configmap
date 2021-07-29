@@ -1,0 +1,13 @@
+ldapUrl: ldaps://ldap:636
+ldapGroupBaseDN: ou=Groups,dc=example,dc=com
+ldapUserBaseDN: ou=People,dc=example,dc=com
+ldapGroupFilter: '(&(objectclass=posixGroup)(status=ACTIVE))'
+ldapUserFilter: '(&(objectclass=posixAccount)(!(nsAccountLock=TRUE))(loginDisabled=FALSE))'
+mappers:
+  - user-uid
+  - user-gid
+  - user-groups
+  - user-gids
+mappersGroupFilter:
+  - user-gids=(objectclass=posixGroup)
+userPrefix: 'user-'

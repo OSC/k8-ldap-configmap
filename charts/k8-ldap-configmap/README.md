@@ -28,6 +28,8 @@ helm install k8-ldap-configmap k8-ldap-configmap/k8-ldap-configmap -n k8-ldap-co
 | ldapUserAttrMap | The user attribute map | `name=uid,uid=uidNumber,gid=gidNumber` |
 |ldapGroupAttrMap | The group attribute map | `name=cn,gid=gidNumber` |
 | mappers | The mappers to enable | `user-uid,user-gid` |
+| mappersUserFilter | Mapper specific user filter | `[]` |
+| mappersGroupFilter | Mapper specific group filter | `[]` |
 | userPrefix | The username prefix when saving usernames to ConfigMaps | `nil` |
 | interval | The interval to sync LDAP to ConfigMaps | `5m` |
 | namespaceConfigMap | The namespace of generated ConfigMaps | The namespace used to deploy chart |

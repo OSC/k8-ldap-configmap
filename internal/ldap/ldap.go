@@ -78,7 +78,7 @@ func LDAPTLS(l *ldap.Conn, config *config.Config, logger log.Logger) error {
 	return err
 }
 
-func LDAPGroups(l *ldap.Conn, config *config.Config, logger log.Logger) (*ldap.SearchResult, error) {
+func LDAPGroups(l *ldap.Conn, filter string, config *config.Config, logger log.Logger) (*ldap.SearchResult, error) {
 	attrs := []string{}
 	for _, a := range config.RequiredGroupAttrs {
 		attrs = append(attrs, config.GroupAttrMap[a])
@@ -91,12 +91,12 @@ func LDAPGroups(l *ldap.Conn, config *config.Config, logger log.Logger) (*ldap.S
 	}
 	level.Debug(logger).Log("msg", "Running group search", "basedn", config.GroupBaseDN, "filter", config.GroupFilter)
 	request := ldap.NewSearchRequest(config.GroupBaseDN, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		config.GroupFilter, attrs, nil)
+		filter, attrs, nil)
 	result, err := LDAPSearch(l, request, "group", config, logger)
 	return result, err
 }
 
-func LDAPUsers(l *ldap.Conn, config *config.Config, logger log.Logger) (*ldap.SearchResult, error) {
+func LDAPUsers(l *ldap.Conn, filter string, config *config.Config, logger log.Logger) (*ldap.SearchResult, error) {
 	attrs := []string{}
 	for _, a := range config.RequiredUserAttrs {
 		attrs = append(attrs, config.UserAttrMap[a])
@@ -106,7 +106,7 @@ func LDAPUsers(l *ldap.Conn, config *config.Config, logger log.Logger) (*ldap.Se
 	}
 	level.Debug(logger).Log("msg", "Running user search", "basedn", config.UserBaseDN, "filter", config.UserFilter)
 	request := ldap.NewSearchRequest(config.UserBaseDN, ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
-		config.UserFilter, attrs, nil)
+		filter, attrs, nil)
 	result, err := LDAPSearch(l, request, "user", config, logger)
 	return result, err
 }

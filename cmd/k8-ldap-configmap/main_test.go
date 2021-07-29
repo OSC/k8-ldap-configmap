@@ -44,6 +44,8 @@ var (
 		fmt.Sprintf("--ldap-user-base-dn=%s", test.UserBaseDN),
 		fmt.Sprintf("--ldap-bind-dn=%s", test.BindDN),
 		"--ldap-bind-password=password",
+		fmt.Sprintf("--ldap-group-filter=%s", test.GroupFilterStatus),
+		fmt.Sprintf("--ldap-user-filter=%s", test.UserFilterStatus),
 		"--namespace=test",
 	}
 )
@@ -103,7 +105,7 @@ func TestRun(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unexpected error getting configmap: %v", err)
 	}
-	if len(userUIDMap.Data) != 4 {
+	if len(userUIDMap.Data) != 3 {
 		t.Errorf("Unexpected number of items in configmap data")
 	}
 	if val, ok := userUIDMap.Data["testuser2"]; !ok {
@@ -115,7 +117,7 @@ func TestRun(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unexpected error getting configmap: %v", err)
 	}
-	if len(userGIDMap.Data) != 4 {
+	if len(userGIDMap.Data) != 3 {
 		t.Errorf("Unexpected number of items in configmap data")
 	}
 	if val, ok := userGIDMap.Data["testuser2"]; !ok {
@@ -134,24 +136,22 @@ func TestRun(t *testing.T) {
 	k8_ldap_configmap_errors_total{mapper="user-uid"} 0
 	# HELP k8_ldap_configmap_keys_count Number of data keys in ConfigMap
 	# TYPE k8_ldap_configmap_keys_count gauge
-	k8_ldap_configmap_keys_count{configmap="user-gid-map"} 4
-	k8_ldap_configmap_keys_count{configmap="user-uid-map"} 4
-	# HELP k8_ldap_configmap_size_bytes Size of ConfigMap in bytes
-	# TYPE k8_ldap_configmap_size_bytes gauge
-	k8_ldap_configmap_size_bytes{configmap="user-gid-map"} 202
-	k8_ldap_configmap_size_bytes{configmap="user-uid-map"} 202
+	k8_ldap_configmap_keys_count{configmap="user-gid-map"} 3
+	k8_ldap_configmap_keys_count{configmap="user-uid-map"} 3
 	`
 
 	if err := testutil.GatherAndCompare(metrics.MetricGathers(false), strings.NewReader(expected),
 		"k8_ldap_configmap_error", "k8_ldap_configmap_errors_total",
-		"k8_ldap_configmap_size_bytes", "k8_ldap_configmap_keys_count"); err != nil {
+		"k8_ldap_configmap_keys_count"); err != nil {
 		t.Errorf("unexpected collecting result:\n%s", err)
 	}
 }
 
 func TestRunGroups(t *testing.T) {
 	args := []string{
-		"--mappers=user-groups",
+		"--mappers=user-groups,user-gids",
+		fmt.Sprintf("--mappers-group-filter=user-gids=%s", test.GroupFilter),
+		fmt.Sprintf("--mappers-user-filter=user-gids=%s", test.UserFilter),
 	}
 	args = append(args, baseArgs...)
 	if _, err := kingpin.CommandLine.Parse(args); err != nil {
@@ -170,12 +170,21 @@ func TestRunGroups(t *testing.T) {
 	}
 	userGroupsMap, err := clientset.CoreV1().ConfigMaps("test").Get(context.TODO(), "user-groups-map", metav1.GetOptions{})
 	if err != nil {
-		t.Errorf("Unexpected error getting configmap: %v", err)
+		t.Errorf("Unexpected error getting user-groups-map configmap: %v", err)
 		return
 	}
-	if len(userGroupsMap.Data) != 4 {
-		t.Errorf("Unexpected number of items in configmap data")
+	userGIDsMap, err := clientset.CoreV1().ConfigMaps("test").Get(context.TODO(), "user-gids-map", metav1.GetOptions{})
+	if err != nil {
+		t.Errorf("Unexpected error getting user-gids-map configmap: %v", err)
+		return
 	}
+	if len(userGroupsMap.Data) != 3 {
+		t.Errorf("Unexpected number of items in user-groups-map configmap data")
+	}
+	if len(userGIDsMap.Data) != 4 {
+		t.Errorf("Unexpected number of items in user-gids-map configmap data")
+	}
+
 	if val, ok := userGroupsMap.Data["testuser1"]; !ok {
 		t.Errorf("Configmap is missing testuser1")
 	} else if val != "[\"testgroup1\",\"testgroup2\"]" {
@@ -191,6 +200,30 @@ func TestRunGroups(t *testing.T) {
 	} else if val != "[\"testgroup2\"]" {
 		t.Errorf("Configmap value for testuser3 is incorrect: %s", val)
 	}
+	if _, ok := userGroupsMap.Data["testuser4"]; ok {
+		t.Errorf("Configmap is should not have testuser4")
+	}
+
+	if val, ok := userGIDsMap.Data["testuser1"]; !ok {
+		t.Errorf("Configmap is missing testuser1")
+	} else if val != "[\"1000\",\"1001\",\"1002\"]" {
+		t.Errorf("Configmap value for testuser1 is incorrect: %s", val)
+	}
+	if val, ok := userGIDsMap.Data["testuser2"]; !ok {
+		t.Errorf("Configmap is missing testuser2")
+	} else if val != "[\"1000\",\"1001\"]" {
+		t.Errorf("Configmap value for testuser2 is incorrect: %s", val)
+	}
+	if val, ok := userGIDsMap.Data["testuser3"]; !ok {
+		t.Errorf("Configmap is missing testuser3")
+	} else if val != "[\"1000\"]" {
+		t.Errorf("Configmap value for testuser3 is incorrect: %s", val)
+	}
+	if val, ok := userGIDsMap.Data["testuser4"]; !ok {
+		t.Errorf("Configmap is missing testuser4")
+	} else if val != "[\"1000\",\"1002\"]" {
+		t.Errorf("Configmap value for testuser4 is incorrect: %s", val)
+	}
 
 	expected := `
 	# HELP k8_ldap_configmap_error Indicates an error was encountered
@@ -198,18 +231,17 @@ func TestRunGroups(t *testing.T) {
 	k8_ldap_configmap_error 0
 	# HELP k8_ldap_configmap_errors_total Total number of errors
 	# TYPE k8_ldap_configmap_errors_total counter
+	k8_ldap_configmap_errors_total{mapper="user-gids"} 0
 	k8_ldap_configmap_errors_total{mapper="user-groups"} 0
 	# HELP k8_ldap_configmap_keys_count Number of data keys in ConfigMap
 	# TYPE k8_ldap_configmap_keys_count gauge
-	k8_ldap_configmap_keys_count{configmap="user-groups-map"} 4
-	# HELP k8_ldap_configmap_size_bytes Size of ConfigMap in bytes
-	# TYPE k8_ldap_configmap_size_bytes gauge
-	k8_ldap_configmap_size_bytes{configmap="user-groups-map"} 283
+	k8_ldap_configmap_keys_count{configmap="user-gids-map"} 4
+	k8_ldap_configmap_keys_count{configmap="user-groups-map"} 3
 	`
 
 	if err := testutil.GatherAndCompare(metrics.MetricGathers(false), strings.NewReader(expected),
 		"k8_ldap_configmap_error", "k8_ldap_configmap_errors_total",
-		"k8_ldap_configmap_size_bytes", "k8_ldap_configmap_keys_count"); err != nil {
+		"k8_ldap_configmap_keys_count"); err != nil {
 		t.Errorf("unexpected collecting result:\n%s", err)
 	}
 }
@@ -233,6 +265,8 @@ func TestValidateArgs(t *testing.T) {
 	if _, err := kingpin.CommandLine.Parse(args); err != nil {
 		t.Errorf("Error parsing args %s", err.Error())
 	}
+	w := log.NewSyncWriter(os.Stderr)
+	logger := log.NewLogfmtLogger(w)
 	err := validateArgs(log.NewNopLogger())
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err.Error())
@@ -244,11 +278,13 @@ func TestValidateArgs(t *testing.T) {
 		"--ldap-group-attr-map=name=cn",
 		"--ldap-member-scheme=foo",
 		"--mappers=user-uid,user-gid,user-groups,foobar",
+		"--mappers-user-filter=user-groups=(foobar=baz),foobar=(foobar=baz)",
+		"--mappers-group-filter=user-groups=(foobar=baz),foobar=(foobar=baz)",
 	}...)
 	if _, err := kingpin.CommandLine.Parse(args); err != nil {
 		t.Errorf("Error parsing args %s", err.Error())
 	}
-	err = validateArgs(log.NewNopLogger())
+	err = validateArgs(logger)
 	if err == nil {
 		t.Errorf("Expected errors")
 	}
@@ -269,6 +305,12 @@ func TestValidateArgs(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "ldap-bind") {
 		t.Errorf("Expected error about missing bind args")
+	}
+	if !strings.Contains(err.Error(), "mappers-user-filter") {
+		t.Errorf("Expected error about incorrect mappers-user-filter")
+	}
+	if !strings.Contains(err.Error(), "mappers-group-filter") {
+		t.Errorf("Expected error about incorrect mappers-group-filter")
 	}
 }
 

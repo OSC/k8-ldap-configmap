@@ -35,7 +35,7 @@ var (
 		GroupBaseDN: test.GroupBaseDN,
 		UserBaseDN:  test.UserBaseDN,
 		BindDN:      test.BindDN,
-		GroupFilter: test.GroupFilter,
+		GroupFilter: test.GroupFilterStatus,
 		UserFilter:  test.UserFilter,
 		GroupAttrMap: map[string]string{
 			"name": "cn",
