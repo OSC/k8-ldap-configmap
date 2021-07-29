@@ -1,4 +1,4 @@
-## Unreleased
+## v0.6.0 / 2021-07-29
 
 * Allow mapper specific user and group LDAP filters
 * Update Kubernetes client-go to v0.21.3 (Kubernetes 1.21) and Go module dependencies
