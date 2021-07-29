@@ -38,4 +38,6 @@ type Config struct {
 	MemberScheme       string
 	UserPrefix         string
 	EnabledMappers     []string
+	MappersUserFilter  map[string]string
+	MappersGroupFilter map[string]string
 }

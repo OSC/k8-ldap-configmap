@@ -1,3 +1,7 @@
+## Unreleased
+
+* Allow mapper specific user and group LDAP filters
+
 ## v0.5.1 / 2021-07-28
 
 * Ensure user-gids mapper values are sorted for each user

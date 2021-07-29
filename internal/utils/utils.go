@@ -37,7 +37,7 @@ func MapKeysStrings(input map[string]string) []string {
 func AttrMap(strMap string) map[string]string {
 	attrMap := make(map[string]string)
 	for _, attrGroup := range strings.Split(strMap, ",") {
-		parts := strings.Split(attrGroup, "=")
+		parts := strings.SplitN(attrGroup, "=", 2)
 		if len(parts) != 2 {
 			continue
 		}

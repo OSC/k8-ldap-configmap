@@ -18,17 +18,21 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strings"
 
+	"github.com/OSC/k8-ldap-configmap/internal/utils"
 	"github.com/lor00x/goldap/message"
 	ldap "github.com/vjeantet/ldapserver"
 )
 
 const (
-	BindDN      = "cn=test,dc=test"
-	GroupBaseDN = "ou=Groups,dc=test"
-	UserBaseDN  = "ou=People,dc=test"
-	GroupFilter = "(objectClass=posixGroup)"
-	UserFilter  = "(objectClass=posixAccount)"
+	BindDN            = "cn=test,dc=test"
+	GroupBaseDN       = "ou=Groups,dc=test"
+	UserBaseDN        = "ou=People,dc=test"
+	GroupFilter       = "(objectClass=posixGroup)"
+	GroupFilterStatus = "(&(objectClass=posixGroup)(status=ACTIVE))"
+	UserFilter        = "(objectClass=posixAccount)"
+	UserFilterStatus  = "(&(objectClass=posixAccount)(status=ACTIVE))"
 )
 
 // GENCERTS: openssl req -newkey rsa:2048 -x509 -sha256 -days 3650 -nodes -out test.out -keyout test.key -subj "/C=US/ST=Ohio/L=Columbus/O=OSC/OU=OSC/CN=127.0.0.1"
@@ -103,9 +107,17 @@ func LdapServer() *ldap.Server {
 		BaseDn(GroupBaseDN).
 		Filter(GroupFilter).
 		Label("SEARCH - GROUP")
+	routes.Search(handleSearchGroup).
+		BaseDn(GroupBaseDN).
+		Filter(GroupFilterStatus).
+		Label("SEARCH - GROUP")
 	routes.Search(handleSearchUser).
 		BaseDn(UserBaseDN).
 		Filter(UserFilter).
+		Label("SEARCH - USER")
+	routes.Search(handleSearchUser).
+		BaseDn(UserBaseDN).
+		Filter(UserFilterStatus).
 		Label("SEARCH - USER")
 	//routes.Search(handleSearch).Label("SEARCH - NO MATCH")
 	routes.Extended(handleStartTLS).RequestName(ldap.NoticeOfStartTLS).Label("StartTLS")
@@ -146,6 +158,7 @@ func handleSearchGroup(w ldap.ResponseWriter, m *ldap.Message) {
 		"testgroup1": {
 			"objectClass": []string{"posixGroup"},
 			"gidNumber":   []string{"1001"},
+			"status":      []string{"ACTIVE"},
 			"memberUid":   []string{"testuser1", "testuser3"},
 			"member": []string{
 				fmt.Sprintf("cn=testuser1,%s", UserBaseDN),
@@ -155,10 +168,21 @@ func handleSearchGroup(w ldap.ResponseWriter, m *ldap.Message) {
 		"testgroup2": {
 			"objectClass": []string{"posixGroup"},
 			"gidNumber":   []string{"1000"},
+			"status":      []string{"ACTIVE"},
 			"memberUid":   []string{"testuser2", "testuser4"},
 			"member": []string{
 				fmt.Sprintf("cn=testuser2,%s", UserBaseDN),
 				fmt.Sprintf("cn=testuser3,%s", UserBaseDN),
+			},
+		},
+		"testgroup3": {
+			"objectClass": []string{"posixGroup"},
+			"gidNumber":   []string{"1002"},
+			"status":      []string{"RESTRICTED"},
+			"memberUid":   []string{"testuser1", "testuser4"},
+			"member": []string{
+				fmt.Sprintf("cn=testuser1,%s", UserBaseDN),
+				fmt.Sprintf("cn=testuser4,%s", UserBaseDN),
 			},
 		},
 	}
@@ -166,6 +190,11 @@ func handleSearchGroup(w ldap.ResponseWriter, m *ldap.Message) {
 		dn := fmt.Sprintf("cn=%s,%s", cn, r.BaseObject())
 		e := ldap.NewSearchResultEntry(dn)
 		e.AddAttribute("cn", message.AttributeValue(cn))
+		if strings.Contains(r.FilterString(), "status=ACTIVE") {
+			if !utils.SliceContains(attrs["status"], "ACTIVE") {
+				continue
+			}
+		}
 		for key, value := range attrs {
 			values := []message.AttributeValue{}
 			for _, v := range value {
@@ -186,6 +215,7 @@ func handleSearchUser(w ldap.ResponseWriter, m *ldap.Message) {
 			"objectClass": []string{"posixAccount"},
 			"uidNumber":   []string{"1000"},
 			"gidNumber":   []string{"1001"},
+			"status":      []string{"ACTIVE"},
 			"memberOf": []string{
 				fmt.Sprintf("cn=Testgroup1,%s", GroupBaseDN),
 				fmt.Sprintf("cn=Testgroup2,%s", GroupBaseDN),
@@ -196,6 +226,7 @@ func handleSearchUser(w ldap.ResponseWriter, m *ldap.Message) {
 			"objectClass": []string{"posixAccount"},
 			"uidNumber":   []string{"1001"},
 			"gidNumber":   []string{"1001"},
+			"status":      []string{"ACTIVE"},
 			"memberOf": []string{
 				fmt.Sprintf("cn=Testgroup2,%s", GroupBaseDN),
 			},
@@ -204,6 +235,7 @@ func handleSearchUser(w ldap.ResponseWriter, m *ldap.Message) {
 			"objectClass": []string{"posixAccount"},
 			"uidNumber":   []string{"1002"},
 			"gidNumber":   []string{"1000"},
+			"status":      []string{"ACTIVE"},
 			"memberOf": []string{
 				fmt.Sprintf("cn=Testgroup2,%s", GroupBaseDN),
 			},
@@ -212,6 +244,10 @@ func handleSearchUser(w ldap.ResponseWriter, m *ldap.Message) {
 			"objectClass": []string{"posixAccount"},
 			"uidNumber":   []string{"1003"},
 			"gidNumber":   []string{"1000"},
+			"status":      []string{"RESTRICTED"},
+			"memberOf": []string{
+				fmt.Sprintf("cn=Testgroup3,%s", GroupBaseDN),
+			},
 		},
 	}
 	for cn, attrs := range data {
@@ -219,6 +255,11 @@ func handleSearchUser(w ldap.ResponseWriter, m *ldap.Message) {
 		e := ldap.NewSearchResultEntry(dn)
 		e.AddAttribute("cn", message.AttributeValue(cn))
 		e.AddAttribute("uid", message.AttributeValue(cn))
+		if strings.Contains(r.FilterString(), "status=ACTIVE") {
+			if !utils.SliceContains(attrs["status"], "ACTIVE") {
+				continue
+			}
+		}
 		for key, value := range attrs {
 			values := []message.AttributeValue{}
 			for _, v := range value {

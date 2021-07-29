@@ -68,6 +68,8 @@ var (
 	ldapUserAttrMap       = kingpin.Flag("ldap-user-attr-map", "Attribute map for users").Default(config.DefaultUserAttrMap).Envar("LDAP_USER_ATTR_MAP").String()
 	ldapGroupAttrMap      = kingpin.Flag("ldap-group-attr-map", "Attribute map for groups").Default(config.DefaultGroupAttrMap).Envar("LDAP_GROUP_ATTR_MAP").String()
 	mappersArg            = kingpin.Flag("mappers", "Comma separated list of mappers to generate.").Default("user-uid,user-gid").Envar("MAPPERS").String()
+	mappersGroupFilter    = kingpin.Flag("mappers-group-filter", "Comma separated mappers filters map for groups").Default("").Envar("MAPPERS_GROUP_FILTER").String()
+	mappersUserFilter     = kingpin.Flag("mappers-user-filter", "Comma separated mappers filters map for users").Default("").Envar("MAPPERS_USER_FILTER").String()
 	namespace             = kingpin.Flag("namespace", "namespace for ConfigMaps").Envar("NAMESPACE").Required().String()
 	userPrefix            = kingpin.Flag("user-prefix", "Prefix to add to user names").Envar("USER_PREFIX").String()
 	interval              = kingpin.Flag("interval", "Duration between sync runs").Default("5m").Envar("INTERLVAL").Duration()
@@ -173,14 +175,14 @@ func run(mappers []mapper.Mapper, config *config.Config, clientset kubernetes.In
 		if len(config.RequiredGroupAttrs) == 0 {
 			return
 		}
-		groupResults, groupErr = localldap.LDAPGroups(l, config, logger)
+		groupResults, groupErr = localldap.LDAPGroups(l, config.GroupFilter, config, logger)
 	}()
 	go func() {
 		defer searchWG.Done()
 		if len(config.RequiredUserAttrs) == 0 {
 			return
 		}
-		userResults, userErr = localldap.LDAPUsers(l, config, logger)
+		userResults, userErr = localldap.LDAPUsers(l, config.UserFilter, config, logger)
 	}()
 	searchWG.Wait()
 	if groupErr != nil {
@@ -194,7 +196,25 @@ func run(mappers []mapper.Mapper, config *config.Config, clientset kubernetes.In
 	for _, m := range mappers {
 		_m := m
 		errs.Go(func() error {
-			data, err := _m.GetData(userResults, groupResults)
+			var err error
+			var mapperGroupResults, mapperUserResults *ldap.SearchResult
+			if filter, ok := config.MappersGroupFilter[_m.Name()]; ok {
+				mapperGroupResults, err = localldap.LDAPGroups(l, filter, config, logger)
+				if err != nil {
+					return err
+				}
+			} else {
+				mapperGroupResults = groupResults
+			}
+			if filter, ok := config.MappersUserFilter[_m.Name()]; ok {
+				mapperUserResults, err = localldap.LDAPUsers(l, filter, config, logger)
+				if err != nil {
+					return err
+				}
+			} else {
+				mapperUserResults = userResults
+			}
+			data, err := _m.GetData(mapperUserResults, mapperGroupResults)
 			if err != nil {
 				metrics.MetricErrorsTotal.WithLabelValues(_m.Name()).Inc()
 				return err
@@ -252,6 +272,8 @@ func createConfig() *config.Config {
 	enabledMappers := strings.Split(*mappersArg, ",")
 	requiredUserAttrs := mapper.RequiredAttrs("user", enabledMappers)
 	requiredGroupAttrs := mapper.RequiredAttrs("group", enabledMappers)
+	mappersUserFilterMap := utils.AttrMap(*mappersUserFilter)
+	mappersGroupFilterMap := utils.AttrMap(*mappersGroupFilter)
 	return &config.Config{
 		LdapURL:            *ldapURL,
 		LdapTLS:            *ldapTLS,
@@ -272,6 +294,8 @@ func createConfig() *config.Config {
 		MemberScheme:       *ldapMemberScheme,
 		UserPrefix:         *userPrefix,
 		EnabledMappers:     enabledMappers,
+		MappersUserFilter:  mappersUserFilterMap,
+		MappersGroupFilter: mappersGroupFilterMap,
 	}
 }
 
@@ -309,6 +333,20 @@ func validateArgs(logger log.Logger) error {
 	for _, mapper := range strings.Split(*mappersArg, ",") {
 		if !utils.SliceContains(validMappers, mapper) {
 			errs = append(errs, fmt.Sprintf("mappers=\"Defined mapper %s is not valid\"", mapper))
+		}
+	}
+	mappersUserFilterMap := utils.AttrMap(*mappersUserFilter)
+	mappersUserFilterMapKeys := utils.MapKeysStrings(mappersUserFilterMap)
+	for _, mapper := range mappersUserFilterMapKeys {
+		if !utils.SliceContains(validMappers, mapper) {
+			errs = append(errs, fmt.Sprintf("mappers-user-filter=\"Defined mapper %s is not valid for mappers filters users\"", mapper))
+		}
+	}
+	mappersGroupFilterMap := utils.AttrMap(*mappersGroupFilter)
+	mappersGroupFilterMapKeys := utils.MapKeysStrings(mappersGroupFilterMap)
+	for _, mapper := range mappersGroupFilterMapKeys {
+		if !utils.SliceContains(validMappers, mapper) {
+			errs = append(errs, fmt.Sprintf("mappers-group-filter=\"Defined mapper %s is not valid for mappers filters groups\"", mapper))
 		}
 	}
 	if len(errs) > 0 {
