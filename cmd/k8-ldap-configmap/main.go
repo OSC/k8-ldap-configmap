@@ -146,7 +146,10 @@ func main() {
 
 	for {
 		var errNum float64
+		start := time.Now()
+		metrics.MetricLastRun.Set(float64(start.Unix()))
 		err = run(mappers, c, clientset, logger)
+		metrics.MetricDuration.Set(time.Since(start).Seconds())
 		if err != nil {
 			errNum = 1
 		}
@@ -157,9 +160,6 @@ func main() {
 }
 
 func run(mappers []mapper.Mapper, config *config.Config, clientset kubernetes.Interface, logger log.Logger) error {
-	start := time.Now()
-	metrics.MetricLastRun.Set(float64(start.Unix()))
-	defer metrics.MetricDuration.Set(time.Since(start).Seconds())
 	l, err := localldap.LDAPConnect(config, logger)
 	if err != nil {
 		return err

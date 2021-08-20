@@ -1,3 +1,7 @@
+## v0.6.1 / 2021-08-20
+
+* Fix run duration metrics to be more accurate
+
 ## v0.6.0 / 2021-07-29
 
 * Allow mapper specific user and group LDAP filters
