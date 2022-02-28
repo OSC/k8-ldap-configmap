@@ -58,11 +58,14 @@ securityContext:
   allowPrivilegeEscalation: false
   capabilities:
     drop:
-    - all
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
   privileged: false
   readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 65534
+  runAsGroup: 65534
 
 service:
   # Specifies whether a service should be created
