@@ -32,11 +32,14 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop:
-            - all
+            - ALL
+          seccompProfile:
+            type: RuntimeDefault
           privileged: false
           readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 65534
+          runAsGroup: 65534
         resources:
           limits:
             memory: 128Mi
