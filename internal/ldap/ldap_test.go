@@ -21,7 +21,7 @@ import (
 
 	"github.com/OSC/k8-ldap-configmap/internal/config"
 	"github.com/OSC/k8-ldap-configmap/internal/test"
-	"github.com/go-kit/kit/log"
+	"github.com/go-kit/log"
 )
 
 const (

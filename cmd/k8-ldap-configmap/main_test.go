@@ -24,7 +24,7 @@ import (
 	"github.com/OSC/k8-ldap-configmap/internal/mapper"
 	"github.com/OSC/k8-ldap-configmap/internal/metrics"
 	"github.com/OSC/k8-ldap-configmap/internal/test"
-	"github.com/go-kit/kit/log"
+	"github.com/go-kit/log"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	v1 "k8s.io/api/core/v1"

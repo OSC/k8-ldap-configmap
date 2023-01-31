@@ -21,8 +21,8 @@ import (
 	"github.com/OSC/k8-ldap-configmap/internal/config"
 	"github.com/OSC/k8-ldap-configmap/internal/metrics"
 	"github.com/OSC/k8-ldap-configmap/internal/utils"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	ldap "github.com/go-ldap/ldap/v3"
 )
 
