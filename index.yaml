@@ -2,6 +2,18 @@ apiVersion: v1
 entries:
   k8-ldap-configmap:
   - apiVersion: v2
+    appVersion: v0.7.1
+    created: "2023-01-31T14:52:35.617039156Z"
+    description: Kubernetes LDAP ConfigMap
+    digest: c176cc547f7c9cee89cc5302e6f6f64686483b40c5fc86e722ba9e225a61050c
+    maintainers:
+    - name: treydock
+    name: k8-ldap-configmap
+    type: application
+    urls:
+    - https://OSC.github.io/k8-ldap-configmap/k8-ldap-configmap-v0.7.1.tgz
+    version: v0.7.1
+  - apiVersion: v2
     appVersion: v0.7.0
     created: "2022-02-28T20:57:12.335010107Z"
     description: Kubernetes LDAP ConfigMap
@@ -133,4 +145,4 @@ entries:
     urls:
     - https://OSC.github.io/k8-ldap-configmap/k8-ldap-configmap-v0.1.0.tgz
     version: v0.1.0
-generated: "2022-02-28T20:57:12.333603694Z"
+generated: "2023-01-31T14:52:35.615650464Z"
