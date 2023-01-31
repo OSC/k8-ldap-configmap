@@ -15,6 +15,7 @@ package mapper
 
 import (
 	"encoding/json"
+	"sort"
 
 	"github.com/OSC/k8-ldap-configmap/internal/config"
 	"github.com/go-kit/log"
@@ -58,6 +59,7 @@ func (m UserGroups) GetData(users *ldap.SearchResult, groups *ldap.SearchResult)
 		for _, group := range groups {
 			groupNames = append(groupNames, group.name)
 		}
+		sort.Strings(groupNames)
 		userGroupsJSON, _ := json.Marshal(groupNames)
 		userGroups[user] = string(userGroupsJSON)
 	}
