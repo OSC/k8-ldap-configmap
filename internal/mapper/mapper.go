@@ -126,9 +126,13 @@ func GetUserGroups(users *ldap.SearchResult, groups *ldap.SearchResult, config *
 			members = entry.GetAttributeValues("memberUid")
 		}
 		for _, member := range members {
+			key := fmt.Sprintf("%s%s", config.UserPrefix, member)
 			groups := []string{}
+			if g, ok := userGroups[key]; ok {
+				groups = g
+			}
 			groups = append(groups, name)
-			userGroups[member] = groups
+			userGroups[key] = groups
 		}
 	}
 
@@ -141,10 +145,11 @@ func GetUserGroups(users *ldap.SearchResult, groups *ldap.SearchResult, config *
 			primaryGroup = g
 		}
 		var groups []string
+		if g, ok := userGroups[key]; ok {
+			groups = g
+		}
 		if config.MemberScheme == "memberof" {
 			groups = GetGroupsMemberOf(entry.GetAttributeValues("memberOf"), groupDNs)
-		} else if g, ok := userGroups[name]; ok {
-			groups = g
 		}
 		if !utils.SliceContains(groups, primaryGroup) && primaryGroup != "" {
 			groups = append([]string{primaryGroup}, groups...)

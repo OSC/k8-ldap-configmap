@@ -185,6 +185,16 @@ func handleSearchGroup(w ldap.ResponseWriter, m *ldap.Message) {
 				fmt.Sprintf("cn=testuser4,%s", UserBaseDN),
 			},
 		},
+		"testgroup4": {
+			"objectClass": []string{"posixGroup"},
+			"gidNumber":   []string{"1003"},
+			"status":      []string{"ACTIVE"},
+			"memberUid":   []string{"testuser2", "testuser4"},
+			"member": []string{
+				fmt.Sprintf("cn=testuser2,%s", UserBaseDN),
+				fmt.Sprintf("cn=testuser4,%s", UserBaseDN),
+			},
+		},
 	}
 	for cn, attrs := range data {
 		dn := fmt.Sprintf("cn=%s,%s", cn, r.BaseObject())
