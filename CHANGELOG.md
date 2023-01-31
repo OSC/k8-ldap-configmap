@@ -1,3 +1,7 @@
+## v0.7.1 / 2023-01-31
+
+* Fix group mappers for member and memberuid (#21)
+
 ## v0.7.0 / 2022-02-28
 
 * Improved pod security
