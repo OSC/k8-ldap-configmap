@@ -1,3 +1,7 @@
+## v0.8.0 / 2023-02-03
+
+* Update to Go 1.19 and update Go module dependencies (#22)
+
 ## v0.7.1 / 2023-01-31
 
 * Fix group mappers for member and memberuid (#21)
