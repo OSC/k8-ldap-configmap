@@ -17,7 +17,7 @@ import (
 	"testing"
 
 	"github.com/OSC/k8-ldap-configmap/internal/ldap"
-	"github.com/go-kit/kit/log"
+	"github.com/go-kit/log"
 )
 
 func TestGetUserGIDsDataMemberOf(t *testing.T) {

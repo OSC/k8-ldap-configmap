@@ -20,8 +20,8 @@ import (
 	"net/url"
 
 	"github.com/OSC/k8-ldap-configmap/internal/config"
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 	ldap "github.com/go-ldap/ldap/v3"
 )
 
