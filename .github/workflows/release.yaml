@@ -11,35 +11,28 @@ jobs:
     name: Create Release
     steps:
       - name: Set version
-        id: version
-        run: echo ::set-output name=version::${GITHUB_REF#refs/*/}
+        run: echo "VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Setup Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
-          go-version: '1.19'
+          go-version-file: go.mod
       - name: Install Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
         with:
-          version: v3.5.0
-      - uses: actions/cache@v2
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          version: v3.8.0
       - uses: creekorful/goreportcard-action@v1.0
       - name: Make Release
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          VERSION: ${{ env.VERSION }}
         run: |
           rm -rf release
           make release
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v4
         with:
           version: latest
           args: release --rm-dist --debug
