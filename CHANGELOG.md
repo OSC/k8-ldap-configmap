@@ -1,3 +1,7 @@
+## v0.9.0 / 2023-06-29
+
+* Update to Go 1.20 (#23)
+
 ## v0.8.0 / 2023-02-03
 
 * Update to Go 1.19 and update Go module dependencies (#22)
