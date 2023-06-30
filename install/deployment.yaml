@@ -18,7 +18,7 @@ spec:
       serviceAccountName: k8-ldap-configmap
       containers:
       - name: k8-ldap-configmap
-        image: docker.io/ohiosupercomputer/k8-ldap-configmap:latest
+        image: quay.io/ohiosupercomputercenter/k8-ldap-configmap:latest
         imagePullPolicy: Always
         args:
         - --ldap-url=

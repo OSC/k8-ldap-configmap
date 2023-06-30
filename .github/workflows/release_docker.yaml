@@ -30,6 +30,11 @@ jobs:
         with:
           username: oscrobot
           password: ${{ secrets.OSC_ROBOT_DOCKERHUB_TOKEN }}
+      - name: Login to quay.io
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_ACCESS_TOKEN }}
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v4
@@ -37,7 +42,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: ohiosupercomputer/k8-ldap-configmap:${{ env.VERSION }}
+          tags: ohiosupercomputer/k8-ldap-configmap:${{ env.VERSION }},quay.io/ohiosupercomputercenter/k8-ldap-configmap:${{ env.VERSION }}
           build-args: |
             VERSION=${{ env.REF }}
       - name: Image digest

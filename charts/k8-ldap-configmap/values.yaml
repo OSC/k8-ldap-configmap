@@ -29,7 +29,7 @@ namespaceConfigMap: ""
 extraArgs: []
 
 image:
-  repository: docker.io/ohiosupercomputer/k8-ldap-configmap
+  repository: quay.io/ohiosupercomputercenter/k8-ldap-configmap
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
