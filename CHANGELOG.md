@@ -1,3 +1,11 @@
+## v0.11.0 / 2025-01-09
+
+* Major updates (#28)
+  ** Build using Go 1.23
+  ** Update all dependencies including Kubernetes to 1.29.12
+  ** Replace go-kit logging with slog from promslog
+  ** Update all Github Actions to latest versions
+
 ## v0.10.0 / 2023-06-30
 
 * Switch container images to use quay.io (#24)
