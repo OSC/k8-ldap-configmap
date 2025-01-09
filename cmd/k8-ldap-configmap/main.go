@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -29,13 +30,12 @@ import (
 	"github.com/OSC/k8-ldap-configmap/internal/mapper"
 	"github.com/OSC/k8-ldap-configmap/internal/metrics"
 	"github.com/OSC/k8-ldap-configmap/internal/utils"
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
+	"github.com/alecthomas/kingpin/v2"
 	ldap "github.com/go-ldap/ldap/v3"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/prometheus/common/promslog"
 	"github.com/prometheus/common/version"
 	"golang.org/x/sync/errgroup"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	corev1 "k8s.io/api/core/v1"
 	k8errors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -76,13 +76,9 @@ var (
 	listenAddress         = kingpin.Flag("listen-address", "Address to listen for HTTP requests").Default(":8080").Envar("LISTEN_ADDRESS").String()
 	processMetrics        = kingpin.Flag("process-metrics", "Collect metrics about running process such as CPU and memory and Go stats").Default("true").Envar("PROCESS_METRICS").Bool()
 	kubeconfig            = kingpin.Flag("kubeconfig", "Path to kubeconfig when running outside Kubernetes cluster").Default("").Envar("KUBECONFIG").String()
-	logLevel              = kingpin.Flag("log-level", "Log level, One of: [debug, info, warn, error]").Default("info").Envar("LOG_LEVEL").String()
-	logFormat             = kingpin.Flag("log-format", "Log format, One of: [logfmt, json]").Default("logfmt").Envar("LOG_FORMAT").String()
+	logLevel              = kingpin.Flag("log-level", "Log level, One of: [debug, info, warn, error]").Default("info").Envar("LOG_LEVEL").Enum(promslog.LevelFlagOptions...)
+	logFormat             = kingpin.Flag("log-format", "Log format, One of: [logfmt, json]").Default("logfmt").Envar("LOG_FORMAT").Enum(promslog.FormatFlagOptions...)
 	validLdapMemberScheme = []string{"memberof", "member", "memberuid"}
-	timestampFormat       = log.TimestampFormat(
-		func() time.Time { return time.Now().UTC() },
-		"2006-01-02T15:04:05.000Z07:00",
-	)
 )
 
 func main() {
@@ -103,28 +99,28 @@ func main() {
 
 	var config *rest.Config
 	if *kubeconfig == "" {
-		level.Info(logger).Log("msg", "Loading in cluster kubeconfig", "kubeconfig", *kubeconfig)
+		logger.Info("Loading in cluster kubeconfig", "kubeconfig", *kubeconfig)
 		config, err = rest.InClusterConfig()
 	} else {
-		level.Info(logger).Log("msg", "Loading kubeconfig", "kubeconfig", *kubeconfig)
+		logger.Info("Loading kubeconfig", "kubeconfig", *kubeconfig)
 		config, err = clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	}
 	if err != nil {
-		level.Error(logger).Log("msg", "Error loading kubeconfig", "err", err)
+		logger.Error("Error loading kubeconfig", "err", err)
 		os.Exit(1)
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		level.Error(logger).Log("msg", "Unable to generate Clientset", "err", err)
+		logger.Error("Unable to generate Clientset", "err", err)
 		os.Exit(1)
 	}
 
 	c := createConfig()
 	mappers := mapper.GetMappers(c, logger)
 
-	level.Info(logger).Log("msg", fmt.Sprintf("Starting %s", appName), "version", version.Info())
-	level.Info(logger).Log("msg", "Build context", "build_context", version.BuildContext())
+	logger.Info(fmt.Sprintf("Starting %s", appName), "version", version.Info())
+	logger.Info("Build context", "build_context", version.BuildContext())
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
@@ -139,7 +135,7 @@ func main() {
 
 	go func() {
 		if err := http.ListenAndServe(*listenAddress, nil); err != nil {
-			level.Error(logger).Log("msg", "Error starting HTTP server", "err", err)
+			logger.Error("Error starting HTTP server", "err", err)
 			os.Exit(1)
 		}
 	}()
@@ -154,12 +150,12 @@ func main() {
 			errNum = 1
 		}
 		metrics.MetricError.Set(errNum)
-		level.Debug(logger).Log("msg", "Sleeping for interval", "interval", fmt.Sprintf("%.0f", (*interval).Seconds()))
+		logger.Debug("Sleeping for interval", "interval", fmt.Sprintf("%.0f", (*interval).Seconds()))
 		time.Sleep(*interval)
 	}
 }
 
-func run(mappers []mapper.Mapper, config *config.Config, clientset kubernetes.Interface, logger log.Logger) error {
+func run(mappers []mapper.Mapper, config *config.Config, clientset kubernetes.Interface, logger *slog.Logger) error {
 	l, err := localldap.LDAPConnect(config, logger)
 	if err != nil {
 		return err
@@ -230,7 +226,7 @@ func run(mappers []mapper.Mapper, config *config.Config, clientset kubernetes.In
 	return errs.Wait()
 }
 
-func configmap(clientset kubernetes.Interface, name string, data map[string]string, logger log.Logger) error {
+func configmap(clientset kubernetes.Interface, name string, data map[string]string, logger *slog.Logger) error {
 	var err error
 	configMap := corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
@@ -252,16 +248,16 @@ func configmap(clientset kubernetes.Interface, name string, data map[string]stri
 		_, err = clientset.CoreV1().ConfigMaps(*namespace).Update(context.TODO(), &configMap, metav1.UpdateOptions{})
 	}
 	if err == nil {
-		level.Info(logger).Log("msg", "ConfigMap sync successful", "action", action, "name", name, "namespace", *namespace)
+		logger.Info("ConfigMap sync successful", "action", action, "name", name, "namespace", *namespace)
 		metrics.MetricConfigMapKeys.WithLabelValues(name).Set(float64(len(data)))
 		configMapJSON, err := json.Marshal(configMap)
 		if err != nil {
-			level.Error(logger).Log("msg", "Unable to marshall configmap to JSON", "name", name, "namespace", *namespace, "err", err)
+			logger.Error("Unable to marshall configmap to JSON", "name", name, "namespace", *namespace, "err", err)
 			return err
 		}
 		metrics.MetricConfigMapSize.WithLabelValues(name).Set(float64(len(configMapJSON)))
 	} else {
-		level.Error(logger).Log("msg", "Failed to sync ConfigMap", "action", action, "name", name, "namespace", *namespace, "err", err)
+		logger.Error("Failed to sync ConfigMap", "action", action, "name", name, "namespace", *namespace, "err", err)
 	}
 	return err
 }
@@ -299,7 +295,7 @@ func createConfig() *config.Config {
 	}
 }
 
-func validateArgs(logger log.Logger) error {
+func validateArgs(logger *slog.Logger) error {
 	errs := []string{}
 	validMappers := mapper.ValidMappers()
 	enabledMappers := strings.Split(*mappersArg, ",")
@@ -351,32 +347,20 @@ func validateArgs(logger log.Logger) error {
 	}
 	if len(errs) > 0 {
 		err = errors.New(strings.Join(errs, ", "))
-		level.Error(logger).Log("err", err)
+		logger.Error(err.Error())
 	}
 	return err
 }
 
-func setupLogging() log.Logger {
-	var logger log.Logger
-	if *logFormat == "json" {
-		logger = log.NewJSONLogger(log.NewSyncWriter(os.Stderr))
-	} else {
-		logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
+func setupLogging() *slog.Logger {
+	level := &promslog.AllowedLevel{}
+	_ = level.Set(*logLevel)
+	format := &promslog.AllowedFormat{}
+	_ = format.Set(*logFormat)
+	promslogConfig := &promslog.Config{
+		Level:  level,
+		Format: format,
 	}
-	switch *logLevel {
-	case "debug":
-		logger = level.NewFilter(logger, level.AllowDebug())
-	case "info":
-		logger = level.NewFilter(logger, level.AllowInfo())
-	case "warn":
-		logger = level.NewFilter(logger, level.AllowWarn())
-	case "error":
-		logger = level.NewFilter(logger, level.AllowError())
-	default:
-		logger = level.NewFilter(logger, level.AllowError())
-		level.Error(logger).Log("msg", "Unrecognized log level", "level", *logLevel)
-		return nil
-	}
-	logger = log.With(logger, "ts", timestampFormat, "caller", log.DefaultCaller)
+	logger := promslog.New(promslogConfig)
 	return logger
 }

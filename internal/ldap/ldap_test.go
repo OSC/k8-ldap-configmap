@@ -21,7 +21,7 @@ import (
 
 	"github.com/OSC/k8-ldap-configmap/internal/config"
 	"github.com/OSC/k8-ldap-configmap/internal/test"
-	"github.com/go-kit/log"
+	"github.com/prometheus/common/promslog"
 )
 
 const (
@@ -66,7 +66,7 @@ func TestMain(m *testing.M) {
 func TestLDAPConnectErr(t *testing.T) {
 	_config := getConfig()
 	_config.LdapURL = "ldap://dne:389"
-	_, err := LDAPConnect(_config, log.NewNopLogger())
+	_, err := LDAPConnect(_config, promslog.NewNopLogger())
 	if err == nil {
 		t.Errorf("Expected an error with invalid LdapURL")
 	}
@@ -75,7 +75,7 @@ func TestLDAPConnectErr(t *testing.T) {
 func TestLDAPConnectBind(t *testing.T) {
 	_config := getConfig()
 	_config.BindPassword = "test"
-	_, err := LDAPConnect(_config, log.NewNopLogger())
+	_, err := LDAPConnect(_config, promslog.NewNopLogger())
 	if err != nil {
 		t.Errorf("Unexpected error during BIND: %s", err.Error())
 	}
@@ -85,7 +85,7 @@ func TestLDAPConnectBindInvalid(t *testing.T) {
 	_config := getConfig()
 	_config.BindDN = "cn=foobar"
 	_config.BindPassword = "test"
-	_, err := LDAPConnect(_config, log.NewNopLogger())
+	_, err := LDAPConnect(_config, promslog.NewNopLogger())
 	if err == nil {
 		t.Errorf("Expected an error with invalid BIND")
 	}
@@ -95,7 +95,7 @@ func TestLDAPConnectTLS(t *testing.T) {
 	_config := getConfig()
 	_config.LdapTLS = true
 	_config.LdapTLSCACert = string(test.LocalhostCert)
-	_, err := LDAPConnect(_config, log.NewNopLogger())
+	_, err := LDAPConnect(_config, promslog.NewNopLogger())
 	if err != nil {
 		t.Errorf("Unexpected error during StartTLS: %s", err.Error())
 	}
@@ -106,7 +106,7 @@ func TestLDAPConnectTLSError(t *testing.T) {
 	_config.LdapURL = "ldap://localhost:389"
 	_config.LdapTLS = true
 	_config.LdapTLSCACert = string(test.LocalhostCert)
-	_, err := LDAPConnect(_config, log.NewNopLogger())
+	_, err := LDAPConnect(_config, promslog.NewNopLogger())
 	if err == nil {
 		t.Errorf("Expected an error with invalid TLS ServerName")
 	}

@@ -15,19 +15,18 @@ package mapper
 
 import (
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 
 	"github.com/OSC/k8-ldap-configmap/internal/config"
 	"github.com/OSC/k8-ldap-configmap/internal/metrics"
 	"github.com/OSC/k8-ldap-configmap/internal/utils"
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	ldap "github.com/go-ldap/ldap/v3"
 )
 
 var (
-	mapperFactories    = make(map[string]func(config *config.Config, logger log.Logger) Mapper)
+	mapperFactories    = make(map[string]func(config *config.Config, logger *slog.Logger) Mapper)
 	requiredUserAttrs  = make(map[string][]string)
 	requiredGroupAttrs = make(map[string][]string)
 )
@@ -43,17 +42,17 @@ type Group struct {
 	gid  int
 }
 
-func registerMapper(name string, requiredUser []string, requiredGroup []string, factory func(config *config.Config, logger log.Logger) Mapper) {
+func registerMapper(name string, requiredUser []string, requiredGroup []string, factory func(config *config.Config, logger *slog.Logger) Mapper) {
 	mapperFactories[name] = factory
 	requiredUserAttrs[name] = requiredUser
 	requiredGroupAttrs[name] = requiredGroup
 }
 
-func GetMappers(config *config.Config, logger log.Logger) []Mapper {
+func GetMappers(config *config.Config, logger *slog.Logger) []Mapper {
 	mappers := []Mapper{}
 	for name, factory := range mapperFactories {
 		if utils.SliceContains(config.EnabledMappers, name) {
-			mapper := factory(config, log.With(logger, "mapper", name))
+			mapper := factory(config, logger.With("mapper", name))
 			mappers = append(mappers, mapper)
 			metrics.MetricErrorsTotal.WithLabelValues(mapper.Name())
 			metrics.MetricConfigMapSize.WithLabelValues(mapper.ConfigMapName())
@@ -100,7 +99,7 @@ func ParseDN(dn string) string {
 	return name[1]
 }
 
-func GetUserGroups(users *ldap.SearchResult, groups *ldap.SearchResult, config *config.Config, logger log.Logger) (map[string][]Group, error) {
+func GetUserGroups(users *ldap.SearchResult, groups *ldap.SearchResult, config *config.Config, logger *slog.Logger) (map[string][]Group, error) {
 	userDNs := make(map[string]string)
 	groupDNs := make(map[string]string)
 	groupToGid := make(map[string]string)
@@ -164,7 +163,7 @@ func GetUserGroups(users *ldap.SearchResult, groups *ldap.SearchResult, config *
 			if gid, ok := groupToGid[groupName]; ok {
 				gidInt, err := strconv.Atoi(gid)
 				if err != nil {
-					level.Error(logger).Log("msg", "Unable to parse GID to int", "err", err, "group", groupName, "gid", gid)
+					logger.Error("Unable to parse GID to int", "err", err, "group", groupName, "gid", gid)
 					return nil, err
 				}
 				group.gid = gidInt

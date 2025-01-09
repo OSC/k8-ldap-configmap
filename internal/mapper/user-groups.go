@@ -15,11 +15,10 @@ package mapper
 
 import (
 	"encoding/json"
+	"log/slog"
 	"sort"
 
 	"github.com/OSC/k8-ldap-configmap/internal/config"
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	ldap "github.com/go-ldap/ldap/v3"
 )
 
@@ -27,7 +26,7 @@ func init() {
 	registerMapper("user-groups", []string{"name", "gid"}, []string{"name", "gid"}, NewUserGroupsMapper)
 }
 
-func NewUserGroupsMapper(config *config.Config, logger log.Logger) Mapper {
+func NewUserGroupsMapper(config *config.Config, logger *slog.Logger) Mapper {
 	return &UserGroups{
 		config: config,
 		logger: logger,
@@ -36,7 +35,7 @@ func NewUserGroupsMapper(config *config.Config, logger log.Logger) Mapper {
 
 type UserGroups struct {
 	config *config.Config
-	logger log.Logger
+	logger *slog.Logger
 }
 
 func (m UserGroups) Name() string {
@@ -48,7 +47,7 @@ func (m UserGroups) ConfigMapName() string {
 }
 
 func (m UserGroups) GetData(users *ldap.SearchResult, groups *ldap.SearchResult) (map[string]string, error) {
-	level.Debug(m.logger).Log("msg", "Mapper running")
+	m.logger.Debug("Mapper running")
 	data, err := GetUserGroups(users, groups, m.config, m.logger)
 	if err != nil {
 		return nil, err
@@ -63,6 +62,6 @@ func (m UserGroups) GetData(users *ldap.SearchResult, groups *ldap.SearchResult)
 		userGroupsJSON, _ := json.Marshal(groupNames)
 		userGroups[user] = string(userGroupsJSON)
 	}
-	level.Debug(m.logger).Log("msg", "Mapper complete", "user-groups", len(userGroups))
+	m.logger.Debug("Mapper complete", "user-groups", len(userGroups))
 	return userGroups, nil
 }
