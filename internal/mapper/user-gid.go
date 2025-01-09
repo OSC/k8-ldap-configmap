@@ -15,10 +15,9 @@ package mapper
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/OSC/k8-ldap-configmap/internal/config"
-	"github.com/go-kit/log"
-	"github.com/go-kit/log/level"
 	ldap "github.com/go-ldap/ldap/v3"
 )
 
@@ -26,7 +25,7 @@ func init() {
 	registerMapper("user-gid", []string{"name", "gid"}, nil, NewUserGIDMapper)
 }
 
-func NewUserGIDMapper(config *config.Config, logger log.Logger) Mapper {
+func NewUserGIDMapper(config *config.Config, logger *slog.Logger) Mapper {
 	return &UserGID{
 		config: config,
 		logger: logger,
@@ -35,7 +34,7 @@ func NewUserGIDMapper(config *config.Config, logger log.Logger) Mapper {
 
 type UserGID struct {
 	config *config.Config
-	logger log.Logger
+	logger *slog.Logger
 }
 
 func (m UserGID) Name() string {
@@ -47,13 +46,13 @@ func (m UserGID) ConfigMapName() string {
 }
 
 func (m UserGID) GetData(users *ldap.SearchResult, groups *ldap.SearchResult) (map[string]string, error) {
-	level.Debug(m.logger).Log("msg", "Mapper running")
+	m.logger.Debug("Mapper running")
 	userGIDs := make(map[string]string)
 	for _, entry := range users.Entries {
 		name := fmt.Sprintf("%s%s", m.config.UserPrefix, entry.GetAttributeValue(m.config.UserAttrMap["name"]))
 		uid := entry.GetAttributeValue(m.config.UserAttrMap["gid"])
 		userGIDs[name] = uid
 	}
-	level.Debug(m.logger).Log("msg", "Mapper complete", "user-gids", len(userGIDs))
+	m.logger.Debug("Mapper complete", "user-gids", len(userGIDs))
 	return userGIDs, nil
 }

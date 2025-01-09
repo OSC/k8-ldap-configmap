@@ -17,21 +17,21 @@ import (
 	"testing"
 
 	"github.com/OSC/k8-ldap-configmap/internal/ldap"
-	"github.com/go-kit/log"
+	"github.com/prometheus/common/promslog"
 )
 
 func TestGetDataMemberOf(t *testing.T) {
 	_config.MemberScheme = "memberof"
-	mapper := NewUserGroupsMapper(_config, log.NewNopLogger())
-	l, err := ldap.LDAPConnect(_config, log.NewNopLogger())
+	mapper := NewUserGroupsMapper(_config, promslog.NewNopLogger())
+	l, err := ldap.LDAPConnect(_config, promslog.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
-	users, err := ldap.LDAPUsers(l, _config.UserFilter, _config, log.NewNopLogger())
+	users, err := ldap.LDAPUsers(l, _config.UserFilter, _config, promslog.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
-	groups, err := ldap.LDAPGroups(l, _config.GroupFilter, _config, log.NewNopLogger())
+	groups, err := ldap.LDAPGroups(l, _config.GroupFilter, _config, promslog.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,16 +51,16 @@ func TestGetDataMemberOf(t *testing.T) {
 
 func TestGetDataMember(t *testing.T) {
 	_config.MemberScheme = "member"
-	mapper := NewUserGroupsMapper(_config, log.NewNopLogger())
-	l, err := ldap.LDAPConnect(_config, log.NewNopLogger())
+	mapper := NewUserGroupsMapper(_config, promslog.NewNopLogger())
+	l, err := ldap.LDAPConnect(_config, promslog.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
-	users, err := ldap.LDAPUsers(l, _config.UserFilter, _config, log.NewNopLogger())
+	users, err := ldap.LDAPUsers(l, _config.UserFilter, _config, promslog.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
-	groups, err := ldap.LDAPGroups(l, _config.GroupFilter, _config, log.NewNopLogger())
+	groups, err := ldap.LDAPGroups(l, _config.GroupFilter, _config, promslog.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,16 +85,16 @@ func TestGetDataMember(t *testing.T) {
 
 func TestGetDataMemberUID(t *testing.T) {
 	_config.MemberScheme = "memberuid"
-	mapper := NewUserGroupsMapper(_config, log.NewNopLogger())
-	l, err := ldap.LDAPConnect(_config, log.NewNopLogger())
+	mapper := NewUserGroupsMapper(_config, promslog.NewNopLogger())
+	l, err := ldap.LDAPConnect(_config, promslog.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
-	users, err := ldap.LDAPUsers(l, _config.UserFilter, _config, log.NewNopLogger())
+	users, err := ldap.LDAPUsers(l, _config.UserFilter, _config, promslog.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
-	groups, err := ldap.LDAPGroups(l, _config.GroupFilter, _config, log.NewNopLogger())
+	groups, err := ldap.LDAPGroups(l, _config.GroupFilter, _config, promslog.NewNopLogger())
 	if err != nil {
 		t.Fatal(err)
 	}
