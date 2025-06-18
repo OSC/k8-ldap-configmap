@@ -1,3 +1,7 @@
+## v0.12.0 / 2025-06-18
+
+* Update to Go 1.24.4 and update dependencies (#32)
+
 ## v0.11.0 / 2025-01-09
 
 * Major updates (#28)
