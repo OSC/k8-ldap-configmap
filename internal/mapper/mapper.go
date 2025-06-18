@@ -119,9 +119,10 @@ func GetUserGroups(users *ldap.SearchResult, groups *ldap.SearchResult, config *
 		groupToGid[name] = gid
 		gidToGroup[gid] = name
 		members := []string{}
-		if config.MemberScheme == "member" {
+		switch config.MemberScheme {
+		case "member":
 			members = GetGroupsMember(entry.GetAttributeValues("member"), userDNs)
-		} else if config.MemberScheme == "memberuid" {
+		case "memberuid":
 			members = entry.GetAttributeValues("memberUid")
 		}
 		for _, member := range members {

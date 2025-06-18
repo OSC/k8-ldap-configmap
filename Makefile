@@ -2,7 +2,7 @@ export GOPATH ?= $(firstword $(subst :, ,$(shell go env GOPATH)))
 GOHOSTOS     ?= $(shell go env GOHOSTOS)
 GOHOSTARCH   ?= $(shell go env GOHOSTARCH)
 GOLANGCI_LINT := $(GOPATH)/bin/golangci-lint
-GOLANGCI_LINT_VERSION := v1.63.4
+GOLANGCI_LINT_VERSION := v2.1.6
 VERSION ?= $(shell git describe --tags --abbrev=0 || git rev-parse --short HEAD)
 GITSHA := $(shell git rev-parse HEAD)
 GITBRANCH := $(shell git rev-parse --abbrev-ref HEAD)
