@@ -19,7 +19,7 @@ This service uses predefined mappers to build the data for each ConfigMap.  Curr
 
 ## Kubernetes support
 
-Currently this code is built and tested against Kubernetes 1.25.x and 1.26.x.
+Currently this code is built and tested against Kubernetes 1.31.x.
 
 ## Install
 

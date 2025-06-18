@@ -353,9 +353,9 @@ func validateArgs(logger *slog.Logger) error {
 }
 
 func setupLogging() *slog.Logger {
-	level := &promslog.AllowedLevel{}
+	level := promslog.NewLevel()
 	_ = level.Set(*logLevel)
-	format := &promslog.AllowedFormat{}
+	format := promslog.NewFormat()
 	_ = format.Set(*logFormat)
 	promslogConfig := &promslog.Config{
 		Level:  level,
