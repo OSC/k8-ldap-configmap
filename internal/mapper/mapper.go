@@ -149,6 +149,7 @@ func GetUserGroups(users *ldap.SearchResult, groups *ldap.SearchResult, config *
 			groups = g
 		}
 		if config.MemberScheme == "memberof" {
+			logger.Debug("member of check", "user", name, "memberOf", len(entry.GetAttributeValues("memberOf")))
 			groups = GetGroupsMemberOf(entry.GetAttributeValues("memberOf"), groupDNs)
 			logger.Debug("member of groups collected", "user", name, "groups", len(groups))
 		}
