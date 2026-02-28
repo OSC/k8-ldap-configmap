@@ -150,10 +150,12 @@ func GetUserGroups(users *ldap.SearchResult, groups *ldap.SearchResult, config *
 		}
 		if config.MemberScheme == "memberof" {
 			groups = GetGroupsMemberOf(entry.GetAttributeValues("memberOf"), groupDNs)
+			logger.Debug("member of groups collected", "user", name, "groups", len(groups))
 		}
 		if !utils.SliceContains(groups, primaryGroup) && primaryGroup != "" {
 			groups = append([]string{primaryGroup}, groups...)
 		}
+		logger.Debug("update userGroups map", "key", key, "groups", len(groups))
 		userGroups[key] = groups
 	}
 
@@ -171,6 +173,7 @@ func GetUserGroups(users *ldap.SearchResult, groups *ldap.SearchResult, config *
 			}
 			groups = append(groups, group)
 		}
+		logger.Debug("Update user data", "user", user, "groups", len(groups))
 		data[user] = groups
 	}
 	return data, nil
