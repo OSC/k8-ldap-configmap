@@ -1,3 +1,7 @@
+## v0.13.1 / 2026-03-02
+
+* Fix helm ldapUserAttrMap default (#35)
+
 ## v0.13.0 / 2026-03-02
 
 * Add user-home and user-all-groups mappers (#34)
