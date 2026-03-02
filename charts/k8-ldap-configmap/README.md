@@ -25,8 +25,8 @@ helm install k8-ldap-configmap k8-ldap-configmap/k8-ldap-configmap -n k8-ldap-co
 | ldapGroupFilter | The search filter for groups | `(objectClass=posixGroup)` |
 | ldapUserFilter | The search filter for users | `(objectClass=posixAccount)` |
 | ldapMemberScheme | The method to determine group membership | `memberof` |
-| ldapUserAttrMap | The user attribute map | `name=uid,uid=uidNumber,gid=gidNumber` |
-|ldapGroupAttrMap | The group attribute map | `name=cn,gid=gidNumber` |
+| ldapUserAttrMap | The user attribute map | `name=uid,uid=uidNumber,gid=gidNumber,home=homeDirectory` |
+| ldapGroupAttrMap | The group attribute map | `name=cn,gid=gidNumber` |
 | mappers | The mappers to enable | `user-uid,user-gid` |
 | mappersUserFilter | Mapper specific user filter | `[]` |
 | mappersGroupFilter | Mapper specific group filter | `[]` |

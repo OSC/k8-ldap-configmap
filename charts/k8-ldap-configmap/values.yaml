@@ -13,7 +13,7 @@ ldapBindPassword: ''
 ldapGroupFilter: '(objectClass=posixGroup)'
 ldapUserFilter: '(objectClass=posixAccount)'
 ldapMemberScheme: memberof
-ldapUserAttrMap: name=uid,uid=uidNumber,gid=gidNumber
+ldapUserAttrMap: name=uid,uid=uidNumber,gid=gidNumber,home=homeDirectory
 ldapGroupAttrMap: name=cn,gid=gidNumber
 mappers:
   - user-uid
