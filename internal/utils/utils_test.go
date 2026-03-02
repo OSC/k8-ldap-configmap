@@ -51,6 +51,7 @@ func TestUserAttrMapDefaults(t *testing.T) {
 		"name": "uid",
 		"uid":  "uidNumber",
 		"gid":  "gidNumber",
+		"home": "homeDirectory",
 	}
 	value := AttrMap(config.DefaultUserAttrMap)
 	if !reflect.DeepEqual(value, expected) {

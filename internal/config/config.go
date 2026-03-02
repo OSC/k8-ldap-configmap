@@ -14,7 +14,7 @@
 package config
 
 var (
-	DefaultUserAttrMap  = "name=uid,uid=uidNumber,gid=gidNumber"
+	DefaultUserAttrMap  = "name=uid,uid=uidNumber,gid=gidNumber,home=homeDirectory"
 	DefaultGroupAttrMap = "name=cn,gid=gidNumber"
 )
 
