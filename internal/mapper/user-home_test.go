@@ -17,8 +17,8 @@ import (
 	"testing"
 
 	"github.com/OSC/k8-ldap-configmap/internal/config"
-	"github.com/prometheus/common/promslog"
 	ldapgo "github.com/go-ldap/ldap/v3"
+	"github.com/prometheus/common/promslog"
 )
 
 func TestGetUserHomes(t *testing.T) {
@@ -29,11 +29,11 @@ func TestGetUserHomes(t *testing.T) {
 				DN: "uid=testuser1,ou=people,dc=example,dc=com",
 				Attributes: []*ldapgo.EntryAttribute{
 					{
-						Name: "uid",
+						Name:   "uid",
 						Values: []string{"testuser1"},
 					},
 					{
-						Name: "homeDirectory",
+						Name:   "homeDirectory",
 						Values: []string{"/home/testuser1"},
 					},
 				},
@@ -42,11 +42,11 @@ func TestGetUserHomes(t *testing.T) {
 				DN: "uid=testuser2,ou=people,dc=example,dc=com",
 				Attributes: []*ldapgo.EntryAttribute{
 					{
-						Name: "uid",
+						Name:   "uid",
 						Values: []string{"testuser2"},
 					},
 					{
-						Name: "homeDirectory",
+						Name:   "homeDirectory",
 						Values: []string{"/home/testuser2"},
 					},
 				},
