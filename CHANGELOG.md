@@ -1,3 +1,8 @@
+## v0.13.0 / 2026-03-02
+
+* Add user-home and user-all-groups mappers (#34)
+* Bump golang.org/x/crypto from 0.39.0 to 0.45.0 (#33)
+
 ## v0.12.0 / 2025-06-18
 
 * Update to Go 1.24.4 and update dependencies (#32)
