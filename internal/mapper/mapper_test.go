@@ -75,10 +75,20 @@ func TestInitRequiredUserAttrs(t *testing.T) {
 	} else if !reflect.DeepEqual(val, []string{"name", "uid"}) {
 		t.Errorf("unexpected required attrs for user user-uid, got %v", val)
 	}
+	if val, ok := requiredUserAttrs["user-home"]; !ok {
+		t.Errorf("user user-home key missing")
+	} else if !reflect.DeepEqual(val, []string{"name", "home"}) {
+		t.Errorf("unexpected required attrs for user user-home, got %v", val)
+	}
 	if val, ok := requiredUserAttrs["user-groups"]; !ok {
 		t.Errorf("user user-groups key missing")
 	} else if !reflect.DeepEqual(val, []string{"name", "gid"}) {
 		t.Errorf("unexpected required attrs for user user-groups, got %v", val)
+	}
+	if val, ok := requiredUserAttrs["user-all-groups"]; !ok {
+		t.Errorf("user user-all-groups key missing")
+	} else if !reflect.DeepEqual(val, []string{"name", "gid"}) {
+		t.Errorf("unexpected required attrs for user user-all-groups, got %v", val)
 	}
 	if val, ok := requiredUserAttrs["user-gids"]; !ok {
 		t.Errorf("user user-gids key missing")
@@ -111,7 +121,7 @@ func TestInitRequiredGroupAttrs(t *testing.T) {
 }
 
 func TestValidMappers(t *testing.T) {
-	expected := []string{"user-gid", "user-groups", "user-uid", "user-gids"}
+	expected := []string{"user-gid", "user-groups", "user-uid", "user-gids", "user-home", "user-all-groups"}
 	value := ValidMappers()
 	sort.Strings(value)
 	sort.Strings(expected)

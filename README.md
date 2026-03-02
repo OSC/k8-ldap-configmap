@@ -15,7 +15,9 @@ This service uses predefined mappers to build the data for each ConfigMap.  Curr
 * user-uid - The key is the username and the value is the user UID
 * user-gid - The Key is the username and the value is the user GID
 * user-groups - The key is the username and the value is JSON string that is array of groups that user is a member of
+* user-all-groups - The key is the username and the value is JSON string that is array of all groups that user is a member of (including primary groups)
 * user-gids - The key is the username and the value is JSON string that is array of group GIDs that user is a member of (GIDs are strings)
+* user-home - The key is the username and the value is the user home directory
 
 ## Kubernetes support
 
@@ -63,6 +65,8 @@ The default filters for searching users and groups (`--ldap-user-filter` and `--
 For example, to override the group filter for `user-gids` mapper: `--mappers-group-filter=user-gids=(objectClass=posixAccount)`.
 Each mapper override must be seperated by a comma.
 
+If the global group filter only looks for "active" groups, the `usre-all-groups` mapper could have a unique filter for all groups, `--mappers-group-filter=user-all-groups=(objectClass=posixGroup)`.
+
 The following flags and environment variables can modify the behavior of the k8-ldap-configmap:
 
 | Flag    | Environment Variable | Description | Default/Required |
@@ -80,7 +84,7 @@ The following flags and environment variables can modify the behavior of the k8-
 | --ldap-paged-search | LDAP_PAGED_SEARCH | Enable paged searches against LDAP | `false` |
 | --ldap-paged-search-size | LDAP_PAGED_SEARCH_SIZE | Size of searches when using paged searches | `1000` |
 | --ldap-member-scheme | LDAP_MEMBER_SCHEME | How group members are defined, `memberof`, `member` or `memberuid` | `memberof` |
-| --ldap-user-attr-map | LDAP_USER_ATTR_MAP | Attribute map for users | `name=uid,uid=uidNumber,gid=gidNumber` |
+| --ldap-user-attr-map | LDAP_USER_ATTR_MAP | Attribute map for users | `name=uid,uid=uidNumber,gid=gidNumber,home=homeDirectory` |
 | --ldap-group-attr-map | LDAP_GROUP_ATTR_MAP | Attribute map for groups | `name=cn,gid=gidNumber` |
 | --mappers | MAPPERS | The mappers to run | `user-uid,user-gid` |
 | --mappers-group-filter | MAPPERS_GROUP_FILTER | The mapper specific group filters | None (use `--ldap-group-filter`) |
