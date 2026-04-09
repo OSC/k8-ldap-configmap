@@ -1,4 +1,3 @@
-[![CI Status](https://github.com/OSC/k8-ldap-configmap/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/OSC/k8-ldap-configmap/actions?query=workflow%3Atest)
 [![GitHub release](https://img.shields.io/github/v/release/OSC/k8-ldap-configmap?include_prereleases&sort=semver)](https://github.com/OSC/k8-ldap-configmap/releases/latest)
 ![GitHub All Releases](https://img.shields.io/github/downloads/OSC/k8-ldap-configmap/total)
 [![Go Report Card](https://goreportcard.com/badge/github.com/OSC/k8-ldap-configmap?ts=1)](https://goreportcard.com/report/github.com/OSC/k8-ldap-configmap)
@@ -21,13 +20,15 @@ This service uses predefined mappers to build the data for each ConfigMap.  Curr
 
 ## Kubernetes support
 
-Currently this code is built and tested against Kubernetes 1.31.x.
+Currently this code is built and tested against Kubernetes 1.32.x.
+
+The Kubernetes APIs used by this project do not tend to change between Kubernetes releases so it is likely this code will work on all 1.x releases of Kubernetes.
 
 ## Install
 
 ### Install with Helm
 
-Only Helm 3 is supported.
+Only Helm 3 and 4 are supported.
 
 ```
 helm repo add k8-ldap-configmap https://osc.github.io/k8-ldap-configmap
