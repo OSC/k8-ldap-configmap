@@ -1,4 +1,3 @@
-[![CI Status](https://github.com/OSC/k8-ldap-configmap/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/OSC/k8-ldap-configmap/actions?query=workflow%3Atest)
 [![GitHub release](https://img.shields.io/github/v/release/OSC/k8-ldap-configmap?include_prereleases&sort=semver)](https://github.com/OSC/k8-ldap-configmap/releases/latest)
 ![GitHub All Releases](https://img.shields.io/github/downloads/OSC/k8-ldap-configmap/total)
 [![Go Report Card](https://goreportcard.com/badge/github.com/OSC/k8-ldap-configmap?ts=1)](https://goreportcard.com/report/github.com/OSC/k8-ldap-configmap)
