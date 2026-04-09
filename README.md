@@ -21,13 +21,15 @@ This service uses predefined mappers to build the data for each ConfigMap.  Curr
 
 ## Kubernetes support
 
-Currently this code is built and tested against Kubernetes 1.31.x.
+Currently this code is built and tested against Kubernetes 1.32.x.
+
+The Kubernetes APIs used by this project do not tend to change between Kubernetes releases so it is likely this code will work on all 1.x releases of Kubernetes.
 
 ## Install
 
 ### Install with Helm
 
-Only Helm 3 is supported.
+Only Helm 3 and 4 are supported.
 
 ```
 helm repo add k8-ldap-configmap https://osc.github.io/k8-ldap-configmap
