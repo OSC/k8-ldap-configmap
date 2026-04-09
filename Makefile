@@ -68,7 +68,8 @@ release:
 
 bump-version:
 	@grep -q '## $(VERSION)' CHANGELOG.md || { echo ">> Update CHANGELOG.md with version" ; exit 1; }
-	@sed -i -e 's/version:.*/version: $(VERSION)/g' -e 's/appVersion:.*/appVersion: $(VERSION)/g' charts/k8-ldap-configmap/Chart.yaml
+	@yq -i e '.version = "$(VERSION)"' charts/k8-ldap-configmap/Chart.yaml
+	@yq -i e '.appVersion = "$(VERSION)"' charts/k8-ldap-configmap/Chart.yaml
 	@git add charts/k8-ldap-configmap/Chart.yaml
 	@git add CHANGELOG.md
 	@git commit -m "Release $(VERSION)"

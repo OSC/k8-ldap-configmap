@@ -1,3 +1,9 @@
+## v0.14.0 / 2026-04-09
+
+* Update all dependencies including Kubernetes to 1.32.13 and Go to 1.26 (#37)
+  * Switch to distroless container
+* Upgrade actions to their latest versions (#36)
+
 ## v0.13.1 / 2026-03-02
 
 * Fix helm ldapUserAttrMap default (#35)
@@ -14,10 +20,10 @@
 ## v0.11.0 / 2025-01-09
 
 * Major updates (#28)
-  ** Build using Go 1.23
-  ** Update all dependencies including Kubernetes to 1.29.12
-  ** Replace go-kit logging with slog from promslog
-  ** Update all Github Actions to latest versions
+  * Build using Go 1.23
+  * Update all dependencies including Kubernetes to 1.29.12
+  * Replace go-kit logging with slog from promslog
+  * Update all Github Actions to latest versions
 
 ## v0.10.0 / 2023-06-30
 
