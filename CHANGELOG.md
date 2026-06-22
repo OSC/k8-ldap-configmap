@@ -1,3 +1,7 @@
+## v0.15.0 / 2026-06-22
+
+* Update to Go 1.26.4 and update module dependencies (#39)
+
 ## v0.14.0 / 2026-04-09
 
 * Update all dependencies including Kubernetes to 1.32.13 and Go to 1.26 (#37)
