@@ -1,3 +1,7 @@
+## v0.16.0 / 2026-06-29
+
+* Use Kubernetes 1.33.13 Go modules (#40)
+
 ## v0.15.0 / 2026-06-22
 
 * Update to Go 1.26.4 and update module dependencies (#39)
